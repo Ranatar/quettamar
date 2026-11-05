@@ -122,8 +122,10 @@ it is its own root.
   ᴺQ.[ᴱQ.], 420 ᴺS.[G.], 156 ᴺS.[N.], and so on. Roots of the index follow the rule of `root-index.xq` (a root
   without references: the language of its first nested entry, ᴺ√ [√] LUP).
 - `alt_source` — that word itself, the base of the neo word: `{"form", "id"}` (ᴱQ. aiko for ᴺQ.[ᴱQ.] aico). On the
-  graph a base of another form (1057 words) shows in the path results: “base: ᴱQ. eldasilquë” under ᴺQ.[ᴱQ.]
-  eldafindë, unless the path passes through it.
+  graph the base comes with the neo word, whatever its kind, and goes with it: often it is the word the neo one
+  replaces (685 of 1479), which the “deprecated words” switch alone would hide (ᴱQ. eldasilqe by ᴺQ.[ᴱQ.]
+  eldafindë). A base of another form (1057 words) also shows in the path results: “base: ᴱQ. eldasilquë” under
+  ᴺQ.[ᴱQ.] eldafindë, unless the path passes through it.
 
 ### The derivation tree (`tree`)
 

@@ -108,8 +108,8 @@ def main(src, template, out, standalone=False):
         if e.get('alt_lang'):
             n['al'] = e['alt_lang']      # Eldamo prints it in brackets: ᴺQ. [ᴱQ.] ulumpë
         src = e.get('alt_source')
-        if src and src['form'] not in (e['word'], e.get('spelling')):
-            n['as'] = [src.get('id') or '', src['form']]   # its base, when the form differs: ᴱQ. aiko
+        if src:
+            n['as'] = [src.get('id') or '', src['form']]   # its base: ᴱQ. aiko for ᴺQ.[ᴱQ.] aico
         if e.get('warnings'):
             n['wn'] = [WARN.index(x) for x in e['warnings']]   # Eldamo's ⚠️ and why
 

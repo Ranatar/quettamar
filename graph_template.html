@@ -1404,9 +1404,40 @@ function showNote() {
   if (mode === 'roots') $('note').textContent = t('ov.note', { r: ovCounts.roots, p: ovCounts.proto, w: ovCounts.words });
   else if (lastCounts) $('note').textContent = t('note.onScreen', { nodes: lastCounts[0], edges: lastCounts[1] });
 }
+// The base of a word made neo from one of Tolkien's -- the word whose language Eldamo writes in brackets
+// (ᴺQ.[ᴱQ.] eldafindë < ᴱQ. eldasilqe) -- comes onto the graph with it, whatever its kind: often it is the
+// word the neo one replaces, a deprecated one, which alone would stay hidden. It goes when that word goes
+let baseKeep = new Set();
+const baseOf = i => { const n = G.nodes[i]; return n.as && NEO.has(n.l) && indexOf.has(n.as[0]) ? indexOf.get(n.as[0]) : -1; };
+function keepBases() {
+  const want = new Map();                       // base -> the neo word it is kept for
+  if (!tolkien()) {
+    for (const i of visible) {
+      if (!(i === focusNode || pathKeep.has(i) || passes(i))) continue;
+      const b = baseOf(i);
+      if (b >= 0 && !want.has(b)) want.set(b, i);
+    }
+  }
+  for (const b of baseKeep) {
+    if (want.has(b)) continue;
+    const by = owners.get(b);
+    if (by) by.delete('base');
+    if ((!by || !by.size) && b !== focusNode) { if (expanded.has(b)) collapseFrom(b); drop(b); }
+  }
+  for (const [b, i] of want) {
+    if (!visible.has(b)) {
+      const p = pos.get(i);
+      if (p && !pos.has(b)) pos.set(b, { x: p.x - 60, y: p.y + (Math.random() - 0.5) * 20 });
+      visible.add(b);
+    }
+    own(b, 'base');
+  }
+  baseKeep = new Set(want.keys());
+}
 function render(refit) {
+  keepBases();
   const shownSet = new Set([...visible].filter(i => i === focusNode || pathKeep.has(i) || passes(i)
-    || (cognateKeep.has(i) && langOn[G.nodes[i].l] !== false)));
+    || ((cognateKeep.has(i) || baseKeep.has(i)) && langOn[G.nodes[i].l] !== false)));
   shownNodes = shownSet;
   const nodes = [...shownSet];
   const edges = shownLinks(shownSet);
@@ -2387,6 +2418,7 @@ function baseHtml(i, p) {
   const n = G.nodes[i];
   if (!n.as || tolkien()) return '';
   const [id, form] = n.as, j = indexOf.has(id) ? indexOf.get(id) : -1;
+  if (form === n.f || form === n.sp) return '';          // the same form: the bracket says it all
   if (j >= 0 && p.nodes.includes(j)) return '';
   const word = j >= 0 ? nodeButton(j)
     : `<span class="mk" style="color:${langColor(n.al, false)}">${esc(codeMarker(n.al, false))}</span> <span class="fm">${esc(form)}</span>`;

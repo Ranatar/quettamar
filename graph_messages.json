@@ -1,0 +1,1146 @@
+{
+ "page.h1": {
+  "ru": "Корни нео-эльдарина",
+  "en": "Neo-Eldarin Roots"
+ },
+ "page.graphLabel": {
+  "ru": "Граф происхождения слов и корней",
+  "en": "Graph of the origin of words and roots"
+ },
+ "page.stat": {
+  "ru": "Eldamo {v} · слов трёх перечней: {words} (и заменённых: {dep}, прочих с ⚠️: {oth}, имён: {nam}) · корней: {roots} · связей: {edges}",
+  "en": "Eldamo {v} · words of the three lists: {words} (and deprecated: {dep}, other ⚠️: {oth}, names: {nam}) · roots: {roots} · links: {edges}"
+ },
+ "lang.switch": {
+  "ru": "English",
+  "en": "Русский"
+ },
+ "lang.title": {
+  "ru": "Switch the interface to English",
+  "en": "Переключить интерфейс на русский"
+ },
+ "search.placeholder": {
+  "ru": "Слово, корень или значение",
+  "en": "Word, root or meaning"
+ },
+ "search.label": {
+  "ru": "Поиск",
+  "en": "Search"
+ },
+ "scope.label": {
+  "ru": "Где искать",
+  "en": "Where to search"
+ },
+ "scope.all": {
+  "ru": "всё",
+  "en": "all"
+ },
+ "scope.roots": {
+  "ru": "корни",
+  "en": "roots"
+ },
+ "search.none": {
+  "ru": "Ничего не найдено. Поиск идёт по формам без диакритики (alda, galad) и по английским значениям (tree).",
+  "en": "Nothing found. Search by forms without diacritics (alda, galad) or by English meanings (tree)."
+ },
+ "legend.nodes": {
+  "ru": "Узлы",
+  "en": "Nodes"
+ },
+ "legend.edges": {
+  "ru": "Связи (от источника к производному)",
+  "en": "Links (from the source to what derives from it)"
+ },
+ "legend.shortcuts": {
+  "ru": "показывать прямые связи корня со словом, если тот же корень ведёт к слову и через промежуточную форму",
+  "en": "show direct links from a root to a word when the same root also leads to the word through an intermediate form"
+ },
+ "legend.hint": {
+  "ru": "Щелчок — карточка узла; двойной — развернуть соседей (с Shift — только производные, с Ctrl или Alt — только источники), повторный двойной — свернуть то, что развернул этот узел; тройной — свернуть всё, что выводится из узла (кроме центра и его дерева). Число «+N» справа от подписи — сколько производных узла ещё не показано, слева — сколько источников. Щелчок по связи выделяет её и её концы. Знак ⚠ перед словом — как ⚠️ у Eldamo: слово заменено (с заменой или без), вычеркнуто, отвергнуто, сомнительно или без значения; причина — в карточке. Узел перетаскивается вместе с тем, что держится только на нём; с Shift — один. Перемещённое остаётся на месте (обведено толще); «Перестроить» снимает закрепления. Колёсико и перетаскивание фона — масштаб и сдвиг.",
+  "en": "Click a node for its card; double-click to expand its neighbours (with Shift the derivatives only, with Ctrl or Alt the sources only), double-click again to collapse what that node expanded; triple-click to fold everything derived from the node (except the focus and its tree). The “+N” right of a label is the number of the node’s derivatives not shown yet, left of it its sources. Click a link to pick it and its ends. A ⚠ before a word is Eldamo’s ⚠️: the word is deprecated (with a replacement or without), deleted, rejected, doubtful or unglossed; the card says which. A node is dragged together with what hangs on it alone; with Shift, alone. What you move stays put (thicker outline); “Re-layout” frees it. Use the wheel and drag the background to zoom and pan."
+ },
+ "legend.n.nq": {
+  "ru": "слово ᴺQ.-перечня",
+  "en": "word of the ᴺQ. list"
+ },
+ "legend.n.ns": {
+  "ru": "слово ᴺS.-перечня",
+  "en": "word of the ᴺS. list"
+ },
+ "legend.n.np": {
+  "ru": "праэльфийское (ᴺ✶)",
+  "en": "Primitive Elvish (ᴺ✶)"
+ },
+ "legend.n.proto": {
+  "ru": "праформа вне перечней",
+  "en": "primitive form outside the lists"
+ },
+ "legend.n.form": {
+  "ru": "слово другого языка",
+  "en": "word of another language"
+ },
+ "legend.n.root": {
+  "ru": "корень рекомендованный",
+  "en": "recommended root"
+ },
+ "legend.n.rootWarn": {
+  "ru": "корень с ⚠",
+  "en": "root with ⚠"
+ },
+ "tools.fit": {
+  "ru": "Вписать",
+  "en": "Fit"
+ },
+ "tools.relayout": {
+  "ru": "Перестроить",
+  "en": "Re-layout"
+ },
+ "note.onScreen": {
+  "ru": "на экране узлов: {nodes} · связей: {edges}",
+  "en": "on screen: nodes {nodes} · links {edges}"
+ },
+ "rel.deriv": {
+  "ru": "деривация",
+  "en": "derivation"
+ },
+ "rel.deriv.long": {
+  "ru": "выведено из",
+  "en": "derived from"
+ },
+ "rel.element": {
+  "ru": "элемент",
+  "en": "element"
+ },
+ "rel.element.long": {
+  "ru": "составлено из",
+  "en": "compounded from"
+ },
+ "rel.combine": {
+  "ru": "слияние форм",
+  "en": "merged form"
+ },
+ "rel.combine.long": {
+  "ru": "та же форма другой концепции (combine)",
+  "en": "the same form in another conception (combine)"
+ },
+ "rel.see": {
+  "ru": "см.",
+  "en": "see"
+ },
+ "rel.see.long": {
+  "ru": "заглушка ссылается (see)",
+  "en": "a stub refers to it (see)"
+ },
+ "rel.deprecated": {
+  "ru": "замена",
+  "en": "replacement"
+ },
+ "rel.deprecated.long": {
+  "ru": "заменённое слово (deprecated)",
+  "en": "a replaced word (deprecated)"
+ },
+ "rel.cognate": {
+  "ru": "корень через когнат",
+  "en": "root via a cognate"
+ },
+ "rel.cognate.long": {
+  "ru": "корень слова найден через его когнат в другом языке",
+  "en": "the word's root is found through its cognate in another language"
+ },
+ "rel.merged": {
+  "ru": "корень слит",
+  "en": "root merged"
+ },
+ "rel.merged.long": {
+  "ru": "корень другой концепции слит в этот",
+  "en": "a root of another conception merged into this one"
+ },
+ "rel.filed": {
+  "ru": "записан под",
+  "en": "filed under"
+ },
+ "rel.filed.long": {
+  "ru": "корень записан под этим",
+  "en": "a root filed under this one"
+ },
+ "rel.rootderiv": {
+  "ru": "корень из корня",
+  "en": "root from root"
+ },
+ "rel.rootderiv.long": {
+  "ru": "корень выводится из корня",
+  "en": "a root derived from a root"
+ },
+ "warn.deprecated": {
+  "ru": "заменён",
+  "en": "deprecated"
+ },
+ "warn.deleted": {
+  "ru": "вычеркнут",
+  "en": "deleted"
+ },
+ "warn.rejected": {
+  "ru": "отвергнут",
+  "en": "rejected"
+ },
+ "warn.doubtful": {
+  "ru": "сомнителен",
+  "en": "doubtful"
+ },
+ "warn.unglossed": {
+  "ru": "без значения",
+  "en": "unglossed"
+ },
+ "warn.early": {
+  "ru": "ранний",
+  "en": "early"
+ },
+ "rule.deriv": {
+  "ru": "названы деривацией",
+  "en": "named by a derivation"
+ },
+ "rule.elements": {
+  "ru": "по элементам",
+  "en": "by elements"
+ },
+ "rule.element": {
+  "ru": "один элемент с корнем",
+  "en": "one element with a root"
+ },
+ "rule.intermediate": {
+  "ru": "через промежуточную форму",
+  "en": "through an intermediate form"
+ },
+ "rule.combine": {
+  "ru": "через слитую форму",
+  "en": "through a merged form"
+ },
+ "rule.see": {
+  "ru": "через заглушку",
+  "en": "through a stub"
+ },
+ "rule.deprecated": {
+  "ru": "через заменённое слово",
+  "en": "through a replaced word"
+ },
+ "rule.cognate": {
+  "ru": "через когнат",
+  "en": "through a cognate"
+ },
+ "rule.self": {
+  "ru": "сам корень",
+  "en": "the root itself"
+ },
+ "group.nq": {
+  "ru": "перечень ᴺQ.",
+  "en": "ᴺQ. list"
+ },
+ "group.ns": {
+  "ru": "перечень ᴺS.",
+  "en": "ᴺS. list"
+ },
+ "group.np": {
+  "ru": "перечень ᴺ✶",
+  "en": "ᴺ✶ list"
+ },
+ "speech.n": {
+  "ru": "сущ.",
+  "en": "n."
+ },
+ "speech.adj": {
+  "ru": "прил.",
+  "en": "adj."
+ },
+ "speech.vb": {
+  "ru": "гл.",
+  "en": "v."
+ },
+ "speech.adv": {
+  "ru": "нареч.",
+  "en": "adv."
+ },
+ "speech.pron": {
+  "ru": "мест.",
+  "en": "pron."
+ },
+ "speech.prep": {
+  "ru": "предл.",
+  "en": "prep."
+ },
+ "speech.conj": {
+  "ru": "союз",
+  "en": "conj."
+ },
+ "speech.interj": {
+  "ru": "межд.",
+  "en": "interj."
+ },
+ "speech.suf": {
+  "ru": "суфф.",
+  "en": "suf."
+ },
+ "speech.pref": {
+  "ru": "преф.",
+  "en": "pref."
+ },
+ "speech.cardinal": {
+  "ru": "числ.",
+  "en": "card. num."
+ },
+ "speech.ordinal": {
+  "ru": "порядк. числ.",
+  "en": "ord. num."
+ },
+ "speech.particle": {
+  "ru": "частица",
+  "en": "particle"
+ },
+ "speech.infix": {
+  "ru": "инфикс",
+  "en": "infix"
+ },
+ "speech.fraction": {
+  "ru": "дробь",
+  "en": "fraction"
+ },
+ "speech.collective-noun": {
+  "ru": "собир. сущ.",
+  "en": "coll. n."
+ },
+ "speech.article": {
+  "ru": "артикль",
+  "en": "art."
+ },
+ "speech.affix": {
+  "ru": "аффикс",
+  "en": "affix"
+ },
+ "speech.?": {
+  "ru": "часть речи неясна",
+  "en": "part of speech unclear"
+ },
+ "kind.root": {
+  "ru": "корень",
+  "en": "root"
+ },
+ "kind.protoform": {
+  "ru": "праформа",
+  "en": "primitive form"
+ },
+ "kind.form": {
+  "ru": "слово другого языка",
+  "en": "word of another language"
+ },
+ "kind.primitiveWord": {
+  "ru": "праэльфийское слово",
+  "en": "Primitive Elvish word"
+ },
+ "kind.word": {
+  "ru": "слово",
+  "en": "word"
+ },
+ "tag.roots": {
+  "ru": "корни: {rule}",
+  "en": "roots: {rule}"
+ },
+ "tag.noRoot": {
+  "ru": "корень не найден",
+  "en": "no root found"
+ },
+ "tag.indirect": {
+  "ru": "непрямой путь",
+  "en": "indirect path"
+ },
+ "tag.indirect.title": {
+  "ru": "в цепочке есть заменённое слово или когнат",
+  "en": "the chain goes through a replaced word or a cognate"
+ },
+ "tag.recommended": {
+  "ru": "рекомендован",
+  "en": "recommended"
+ },
+ "tag.notListed": {
+  "ru": "вне перечня",
+  "en": "not in the list"
+ },
+ "tag.notListed.title": {
+  "ru": "Eldamo не выводит этот корень в перечне roots-np",
+  "en": "Eldamo does not show this root in the roots-np list"
+ },
+ "tag.derivatives": {
+  "ru": "производных: {n}",
+  "en": "derivatives: {n}"
+ },
+ "tag.nm": {
+  "ru": "согласные не сошлись",
+  "en": "consonants do not match"
+ },
+ "tag.direct": {
+  "ru": "напрямую",
+  "en": "direct"
+ },
+ "tag.direct.title": {
+  "ru": "тот же корень ведёт к слову и через промежуточную форму",
+  "en": "the same root also leads to the word through an intermediate form"
+ },
+ "card.dbForm": {
+  "ru": "в базе {f}",
+  "en": "spelled {f} in the database"
+ },
+ "card.instead": {
+  "ru": "Вместо него Eldamo советует",
+  "en": "Eldamo suggests instead"
+ },
+ "card.from": {
+  "ru": "Происходит от",
+  "en": "Comes from"
+ },
+ "card.gives": {
+  "ru": "Даёт ({n})",
+  "en": "Gives rise to ({n})"
+ },
+ "card.more": {
+  "ru": "и ещё {n}; «Развернуть соседей» покажет их на графе",
+  "en": "and {n} more; “Expand neighbours” shows them on the graph"
+ },
+ "card.written": {
+  "ru": "записано {src}: {chain}",
+  "en": "written {src}: {chain}"
+ },
+ "card.eldamo": {
+  "ru": "страница Eldamo ↗",
+  "en": "Eldamo page ↗"
+ },
+ "act.focus": {
+  "ru": "Сделать центром",
+  "en": "Centre on it"
+ },
+ "act.expand": {
+  "ru": "Развернуть соседей",
+  "en": "Expand neighbours"
+ },
+ "act.remove": {
+  "ru": "Убрать с графа",
+  "en": "Remove from graph"
+ },
+ "edge.nm": {
+  "ru": "согласные корня в слове не нашлись",
+  "en": "the root’s consonants are not found in the word"
+ },
+ "edge.sc": {
+  "ru": "напрямую: тот же корень ведёт к слову и через промежуточную форму",
+  "en": "direct: the same root also leads to the word through an intermediate form"
+ },
+ "langname.q": {
+  "ru": "квенья",
+  "en": "Quenya"
+ },
+ "langname.mq": {
+  "ru": "квенья «Этимологий» (ᴹQ.)",
+  "en": "Middle Quenya"
+ },
+ "langname.eq": {
+  "ru": "ранний квенья",
+  "en": "Early Quenya"
+ },
+ "langname.nq": {
+  "ru": "нео-квенья",
+  "en": "Neo-Quenya"
+ },
+ "langname.s": {
+  "ru": "синдарин",
+  "en": "Sindarin"
+ },
+ "langname.n": {
+  "ru": "нолдорин",
+  "en": "Noldorin"
+ },
+ "langname.en": {
+  "ru": "ранний нолдорин",
+  "en": "Early Noldorin"
+ },
+ "langname.g": {
+  "ru": "гномский",
+  "en": "Gnomish"
+ },
+ "langname.ns": {
+  "ru": "нео-синдарин",
+  "en": "Neo-Sindarin"
+ },
+ "langname.on": {
+  "ru": "древненолдоринский",
+  "en": "Old Noldorin"
+ },
+ "langname.os": {
+  "ru": "древнесиндаринский",
+  "en": "Old Sindarin"
+ },
+ "langname.t": {
+  "ru": "телерин",
+  "en": "Telerin"
+ },
+ "langname.mt": {
+  "ru": "телерин «Этимологий» (ᴹT.)",
+  "en": "Middle Telerin"
+ },
+ "langname.et": {
+  "ru": "ранний телерин",
+  "en": "Early Telerin"
+ },
+ "langname.ilk": {
+  "ru": "илькорин",
+  "en": "Ilkorin"
+ },
+ "langname.eilk": {
+  "ru": "ранний илькорин",
+  "en": "Early Ilkorin"
+ },
+ "langname.dan": {
+  "ru": "данский",
+  "en": "Danian"
+ },
+ "langname.nan": {
+  "ru": "нандорин",
+  "en": "Nandorin"
+ },
+ "langname.aq": {
+  "ru": "древний квенья",
+  "en": "Ancient Quenya"
+ },
+ "langname.maq": {
+  "ru": "древний квенья «Этимологий»",
+  "en": "Middle Ancient Quenya"
+ },
+ "langname.at": {
+  "ru": "древний телерин",
+  "en": "Ancient Telerin"
+ },
+ "langname.van": {
+  "ru": "ваньярин",
+  "en": "Vanyarin"
+ },
+ "langname.norths": {
+  "ru": "северный синдарин",
+  "en": "North Sindarin"
+ },
+ "langname.ad": {
+  "ru": "адунайский",
+  "en": "Adûnaic"
+ },
+ "langname.av": {
+  "ru": "аварин",
+  "en": "Avarin"
+ },
+ "langname.lem": {
+  "ru": "лемберин",
+  "en": "Lemberin"
+ },
+ "langname.lin": {
+  "ru": "линдарин",
+  "en": "Lindarin"
+ },
+ "langname.p": {
+  "ru": "праэльфийский",
+  "en": "Primitive Elvish"
+ },
+ "langname.mp": {
+  "ru": "праэльфийский «Этимологий» (ᴹ✶)",
+  "en": "Middle Primitive Elvish"
+ },
+ "langname.ep": {
+  "ru": "ранний праэльфийский",
+  "en": "Early Primitive Elvish"
+ },
+ "langname.np": {
+  "ru": "нео-праэльфийский",
+  "en": "Neo-Primitive Elvish"
+ },
+ "act.collapse": {
+  "ru": "Свернуть соседей",
+  "en": "Collapse neighbours"
+ },
+ "mode.graph": {
+  "ru": "Граф",
+  "en": "Graph"
+ },
+ "mode.roots": {
+  "ru": "Карта истоков",
+  "en": "Origins map"
+ },
+ "mode.label": {
+  "ru": "Вид",
+  "en": "View"
+ },
+ "ov.recommended": {
+  "ru": "только рекомендованные",
+  "en": "recommended only"
+ },
+ "ov.free": {
+  "ru": "только без производных",
+  "en": "without derivatives only"
+ },
+ "ov.note": {
+  "ru": "на карте — корней: {r} · праформ: {p} · слов: {w}",
+  "en": "on the map — roots: {r} · primitive forms: {p} · words: {w}"
+ },
+ "ov.hint": {
+  "ru": "Истоки графа: корни перечня roots-np и праформы и слова, у которых Eldamo корня не даёт. Группы — по виду и первой букве, площадь круга — число производных слов перечней. Языки и заменённые слова отбираются в легенде. Щелчок — карточка, двойной щелчок — граф узла. Подписи появляются при увеличении.",
+  "en": "The origins of the graph: the roots of the roots-np list, and the primitive forms and words Eldamo gives no root for. Grouped by kind and first letter; a circle's area is the number of list words derived from it. Languages and deprecated words are chosen in the legend. Click for the card, double-click for the node's graph. Labels appear as you zoom in."
+ },
+ "ov.show.roots": {
+  "ru": "корни",
+  "en": "roots"
+ },
+ "ov.show.proto": {
+  "ru": "праформы без корня",
+  "en": "primitive forms without a root"
+ },
+ "ov.show.words": {
+  "ru": "прочие слова без корня",
+  "en": "other words without a root"
+ },
+ "ov.show": {
+  "ru": "Показать",
+  "en": "Show"
+ },
+ "ov.rootFilters": {
+  "ru": "Корни",
+  "en": "Roots"
+ },
+ "tag.noRootDerivatives": {
+  "ru": "производных слов перечней: {n}",
+  "en": "list words derived from it: {n}"
+ },
+ "rel.instead": {
+  "ru": "вместо него",
+  "en": "instead"
+ },
+ "rel.instead.long": {
+  "ru": "заменённое слово → то, что Eldamo советует вместо него",
+  "en": "a deprecated word → what Eldamo suggests instead"
+ },
+ "legend.n.merged": {
+  "ru": "форма другой концепции (вложена в слово)",
+  "en": "form of another conception (nested in a word)"
+ },
+ "legend.n.dep": {
+  "ru": "заменённое слово",
+  "en": "deprecated word"
+ },
+ "legend.show": {
+  "ru": "Показывать",
+  "en": "Show"
+ },
+ "legend.langs": {
+  "ru": "Языки",
+  "en": "Languages"
+ },
+ "filter.deprecated": {
+  "ru": "заменённые слова (Eldamo не советует их для нео-эльдарина)",
+  "en": "deprecated words (Eldamo advises against them for Neo-Eldarin)"
+ },
+ "branch.quenya": {
+  "ru": "квенийская ветвь",
+  "en": "Quenya branch"
+ },
+ "branch.sindarin": {
+  "ru": "синдаринская ветвь",
+  "en": "Sindarin branch"
+ },
+ "branch.primitive": {
+  "ru": "праэльфийский",
+  "en": "Primitive Elvish"
+ },
+ "branch.elvish": {
+  "ru": "другие эльфийские",
+  "en": "other Elvish"
+ },
+ "branch.other": {
+  "ru": "прочие",
+  "en": "others"
+ },
+ "tag.deprecatedWord": {
+  "ru": "заменено",
+  "en": "deprecated"
+ },
+ "tag.deprecatedWord.title": {
+  "ru": "Eldamo не советует это слово для нео-эльдарина",
+  "en": "Eldamo advises against this word for Neo-Eldarin"
+ },
+ "tag.mergedForm": {
+  "ru": "форма другой концепции",
+  "en": "form of another conception"
+ },
+ "tag.mergedForm.title": {
+  "ru": "вложена в страницу слова и слита с ним (combine)",
+  "en": "nested in a word's page and merged into it (combine)"
+ },
+ "card.filteredOut": {
+  "ru": "Узел скрыт фильтрами легенды (язык или заменённые слова); связи через него показаны пунктиром «через скрытое».",
+  "en": "The node is hidden by the legend's filters (a language or deprecated words); links through it show as dotted “through hidden nodes”."
+ },
+ "edge.via": {
+  "ru": "через скрытые фильтром узлы",
+  "en": "through nodes hidden by a filter"
+ },
+ "card.replaces": {
+  "ru": "Заменяет слова, которые Eldamo не советует ({n})",
+  "en": "Replaces words Eldamo advises against ({n})"
+ },
+ "par.label": {
+  "ru": "Формы других концепций",
+  "en": "Forms of other conceptions"
+ },
+ "par.bands": {
+  "ru": "полосами: нео, поздняя, средняя, ранняя",
+  "en": "in bands: neo, late, middle, early"
+ },
+ "par.stack": {
+  "ru": "под своим словом, как на странице Eldamo",
+  "en": "under their word, as on Eldamo's page"
+ },
+ "par.free": {
+  "ru": "отдельно, обычными стрелками",
+  "en": "apart, as ordinary arrows"
+ },
+ "band.0": {
+  "ru": "нео-эльдарин",
+  "en": "Neo-Eldarin"
+ },
+ "band.1": {
+  "ru": "поздняя концепция",
+  "en": "late conception"
+ },
+ "band.2": {
+  "ru": "средняя концепция («Этимологии»)",
+  "en": "middle conception (Etymologies)"
+ },
+ "act.collapseDer": {
+  "ru": "Свернуть производные",
+  "en": "Fold derivatives"
+ },
+ "theme.auto": {
+  "ru": "авто",
+  "en": "auto"
+ },
+ "theme.light": {
+  "ru": "светлая",
+  "en": "light"
+ },
+ "theme.dark": {
+  "ru": "тёмная",
+  "en": "dark"
+ },
+ "theme.title": {
+  "ru": "Тема: авто (как в системе) → светлая → тёмная",
+  "en": "Theme: auto (as the system) → light → dark"
+ },
+ "order.label": {
+  "ru": "Порядок в столбце",
+  "en": "Order within a column"
+ },
+ "order.source": {
+  "ru": "по источникам, внутри — по ветвям",
+  "en": "by source, then by branch"
+ },
+ "order.branch": {
+  "ru": "по ветвям, внутри — по источникам",
+  "en": "by branch, then by source"
+ },
+ "order.alpha": {
+  "ru": "по алфавиту",
+  "en": "alphabetical"
+ },
+ "hidden.in": {
+  "ru": "не показано источников: {n}",
+  "en": "sources not shown: {n}"
+ },
+ "hidden.out": {
+  "ru": "не показано производных: {n}",
+  "en": "derivatives not shown: {n}"
+ },
+ "act.expandIn": {
+  "ru": "← Источники ({n})",
+  "en": "← Sources ({n})"
+ },
+ "act.expandIn.title": {
+  "ru": "развернуть только источники: прежние формы, элементы, слитые формы, когнаты (Ctrl или Alt + двойной щелчок)",
+  "en": "expand the sources only: earlier forms, elements, merged forms, cognates (Ctrl or Alt + double-click)"
+ },
+ "act.expandOut": {
+  "ru": "Производные ({n}) →",
+  "en": "Derivatives ({n}) →"
+ },
+ "act.expandOut.title": {
+  "ru": "развернуть только производные: последующие формы и слова, в которых это слово — элемент (Shift + двойной щелчок)",
+  "en": "expand the derivatives only: later forms and words this one is an element of (Shift + double-click)"
+ },
+ "card.edge": {
+  "ru": "связь",
+  "en": "link"
+ },
+ "card.edgeFrom": {
+  "ru": "Источник",
+  "en": "Source"
+ },
+ "card.edgeTo": {
+  "ru": "Производное",
+  "en": "Derivative"
+ },
+ "card.edgeWritten": {
+  "ru": "Как записано",
+  "en": "As written"
+ },
+ "card.edgeHint": {
+  "ru": "Щелчок по пустому месту графа или Esc снимает выделение связи.",
+  "en": "Click an empty spot of the graph or press Esc to clear the link selection."
+ },
+ "export.label": {
+  "ru": "Экспорт",
+  "en": "Export"
+ },
+ "export.svg": {
+  "ru": "SVG — граф на экране, векторный",
+  "en": "SVG — the graph on screen, vector"
+ },
+ "export.png": {
+  "ru": "PNG — граф на экране",
+  "en": "PNG — the graph on screen"
+ },
+ "export.json": {
+  "ru": "JSON — узлы и связи на экране",
+  "en": "JSON — the nodes and links on screen"
+ },
+ "export.map": {
+  "ru": "PNG — вся карта истоков",
+  "en": "PNG — the whole origins map"
+ },
+ "export.failed": {
+  "ru": "Не удалось сохранить файл: {e}",
+  "en": "Could not save the file: {e}"
+ },
+ "edge.st": {
+  "ru": "только по ссылке, которую Толкин зачеркнул (Eldamo приводит и такие деривации)",
+  "en": "only by a reference Tolkien struck out (Eldamo lists such derivations too)"
+ },
+ "tag.struck": {
+  "ru": "зачёркнуто",
+  "en": "struck out"
+ },
+ "rule.struck": {
+  "ru": "по зачёркнутой ссылке",
+  "en": "by a struck reference"
+ },
+ "warnw.deprecated": {
+  "ru": "заменено",
+  "en": "deprecated"
+ },
+ "warnw.deleted": {
+  "ru": "вычеркнуто",
+  "en": "deleted"
+ },
+ "warnw.rejected": {
+  "ru": "отвергнуто Толкином",
+  "en": "rejected"
+ },
+ "warnw.doubtful": {
+  "ru": "сомнительно",
+  "en": "doubtful"
+ },
+ "warnw.unglossed": {
+  "ru": "без значения",
+  "en": "unglossed"
+ },
+ "warnw.early": {
+  "ru": "ранняя концепция",
+  "en": "early"
+ },
+ "tag.deprecatedNone": {
+  "ru": "не советуется, замены нет",
+  "en": "deprecated, no replacement"
+ },
+ "tag.deprecatedNone.title": {
+  "ru": "Eldamo не советует это слово для нео-эльдарина и замены не предлагает",
+  "en": "Eldamo advises against this word for Neo-Eldarin and suggests no replacement"
+ },
+ "filter.other": {
+  "ru": "прочие слова с ⚠️ вне перечней (ранние, отвергнутые, вычеркнутые, без значения)",
+  "en": "other ⚠️ words outside the lists (early, rejected, deleted, unglossed)"
+ },
+ "legend.n.other": {
+  "ru": "слово вне перечней (⚠️ у Eldamo)",
+  "en": "word outside the lists (⚠️ in Eldamo)"
+ },
+ "tag.outside": {
+  "ru": "вне перечней",
+  "en": "outside the lists"
+ },
+ "tag.outside.title": {
+  "ru": "Eldamo помечает это слово ⚠️ и не включает ни в перечень, ни в список заменённых",
+  "en": "Eldamo marks this word ⚠️ and puts it neither in a vocabulary list nor among the deprecated words"
+ },
+ "note.unknown": {
+  "ru": "Страницы Eldamo {id} на графе нет: граф берёт слова перечней, заменённые, формы других концепций, прочие слова с ⚠️ и имена, но не фразы и грамматику.",
+  "en": "Eldamo page {id} is not on the graph: it takes the words of the lists, deprecated words, forms of other conceptions, other ⚠️ words and names, but not phrases or grammar."
+ },
+ "filter.names": {
+  "ru": "имена (места, лица, народы)",
+  "en": "names (places, persons, peoples)"
+ },
+ "legend.n.name": {
+  "ru": "имя (вне перечней)",
+  "en": "name (outside the lists)"
+ },
+ "tag.name": {
+  "ru": "имя",
+  "en": "name"
+ },
+ "tag.name.title": {
+  "ru": "Имя собственное: Eldamo не включает имена в перечни, но их элементы и деривации такие же, как у слов",
+  "en": "A proper name: Eldamo keeps names out of its vocabulary lists, but their elements and derivations are those of words"
+ },
+ "kind.name": {
+  "ru": "имя",
+  "en": "name"
+ },
+ "speech.place-name": {
+  "ru": "топоним",
+  "en": "place name"
+ },
+ "speech.masc-name": {
+  "ru": "мужское имя",
+  "en": "masculine name"
+ },
+ "speech.fem-name": {
+  "ru": "женское имя",
+  "en": "feminine name"
+ },
+ "speech.proper-name": {
+  "ru": "имя собственное",
+  "en": "proper name"
+ },
+ "speech.collective-name": {
+  "ru": "собирательное имя",
+  "en": "collective name"
+ },
+ "vocab.label": {
+  "ru": "Словарь",
+  "en": "Vocabulary"
+ },
+ "vocab.neo": {
+  "ru": "нео-эльдарин: неологизмы, замены и ⚠ (как Eldamo с ?neo)",
+  "en": "Neo-Eldarin: neologisms, replacements and ⚠ (as Eldamo with ?neo)"
+ },
+ "vocab.tolkien": {
+  "ru": "только Толкин (как Eldamo без ?neo)",
+  "en": "Tolkien only (as Eldamo without ?neo)"
+ },
+ "path.title": {
+  "ru": "Путь между словами",
+  "en": "Path between words"
+ },
+ "path.from": {
+  "ru": "от слова или корня",
+  "en": "from a word or root"
+ },
+ "path.to": {
+  "ru": "до слова или корня",
+  "en": "to a word or root"
+ },
+ "path.swap": {
+  "ru": "поменять местами",
+  "en": "swap"
+ },
+ "path.mode": {
+  "ru": "Что искать",
+  "en": "What to look for"
+ },
+ "path.mode.kin": {
+  "ru": "родство: ближайший общий источник",
+  "en": "kinship: the nearest common source"
+ },
+ "path.mode.origin": {
+  "ru": "происхождение: одно из другого",
+  "en": "origin: one from the other"
+ },
+ "path.mode.any": {
+  "ru": "любая связь",
+  "en": "any connection"
+ },
+ "path.policy": {
+  "ru": "Переходы между концепциями и ветвями",
+  "en": "Crossing conceptions and branches"
+ },
+ "path.policy.fewest": {
+  "ru": "как можно меньше (сначала концепции, потом ветви)",
+  "en": "as few as possible (conceptions first, then branches)"
+ },
+ "path.policy.none": {
+  "ru": "запрещены: внутри одной концепции и ветви",
+  "en": "none: within one conception and branch"
+ },
+ "path.policy.conceptionsNot": {
+  "ru": "только между ветвями",
+  "en": "between branches only"
+ },
+ "path.policy.branchesNot": {
+  "ru": "только между концепциями",
+  "en": "between conceptions only"
+ },
+ "path.policy.any": {
+  "ru": "не учитывать: кратчайший путь",
+  "en": "ignore them: the shortest path"
+ },
+ "path.loose": {
+  "ru": "и через нестрогие связи (см., когнат, вместо него, зачёркнутые ссылки)",
+  "en": "also through loose links (see, cognate, instead, struck references)"
+ },
+ "path.find": {
+  "ru": "Найти",
+  "en": "Find"
+ },
+ "path.clear": {
+  "ru": "Сбросить",
+  "en": "Clear"
+ },
+ "path.pick": {
+  "ru": "Выберите оба конца: в полях выше или кнопками «путь отсюда» / «путь сюда» в карточке.",
+  "en": "Pick both ends: in the fields above or with “path from here” / “path to here” in a card."
+ },
+ "path.same": {
+  "ru": "Начало и конец совпадают.",
+  "en": "The two ends are the same."
+ },
+ "path.none.policy": {
+  "ru": "Пути нет при этих условиях. Попробуйте разрешить переходы или нестрогие связи, или другой вид поиска.",
+  "en": "No path under these conditions. Try allowing crossings or loose links, or another kind of search."
+ },
+ "path.none.any": {
+  "ru": "Пути нет: эти узлы не связаны на графе (с учётом языков и видов слов, выбранных в легенде).",
+  "en": "No path: these nodes are not connected on the graph (given the languages and kinds of words chosen in the legend)."
+ },
+ "path.inConc": {
+  "ru": "в пределах концепции: {c}",
+  "en": "within one conception: {c}"
+ },
+ "path.crossConc": {
+  "ru": "пересекает концепции: {list} (переходов: {n})",
+  "en": "crosses conceptions: {list} ({n} crossing(s))"
+ },
+ "path.inBranch": {
+  "ru": "{b}",
+  "en": "{b}"
+ },
+ "path.viaPrimitive": {
+  "ru": "ветви сходятся через праэльфийский",
+  "en": "the branches meet through Primitive Elvish"
+ },
+ "path.crossBranch": {
+  "ru": "пересекает ветви: {list} (переходов: {n})",
+  "en": "crosses branches: {list} ({n} crossing(s))"
+ },
+ "path.steps": {
+  "ru": "шагов: {n}",
+  "en": "{n} step(s)"
+ },
+ "path.shorter": {
+  "ru": "короче, но с переходами",
+  "en": "shorter, with crossings"
+ },
+ "path.other": {
+  "ru": "другой путь {n}",
+  "en": "another path {n}"
+ },
+ "path.showThis": {
+  "ru": "показать этот путь",
+  "en": "show this path"
+ },
+ "path.fromA": {
+  "ru": "второе выводится из первого",
+  "en": "the second comes from the first"
+ },
+ "path.fromB": {
+  "ru": "первое выводится из второго",
+  "en": "the first comes from the second"
+ },
+ "path.source": {
+  "ru": "общий источник:",
+  "en": "common source:"
+ },
+ "path.mConc": {
+  "ru": "смена концепции",
+  "en": "conception changes"
+ },
+ "path.mConc.title": {
+  "ru": "шаг соединяет разные концепции: слитая форма, корень другой эпохи, замена или деривация из другого периода",
+  "en": "the step joins different conceptions: a merged form, a root of another period, a replacement or a derivation across periods"
+ },
+ "path.mBranch": {
+  "ru": "смена ветви",
+  "en": "branch changes"
+ },
+ "path.mBranch.title": {
+  "ru": "боковой шаг между ветвями: когнат, заимствование, «см.» (путь через праформу ветвь не меняет)",
+  "en": "a sideways step between branches: a cognate, a borrowing, “see” (the way through a primitive form does not change the branch)"
+ },
+ "act.pathFrom": {
+  "ru": "путь отсюда",
+  "en": "path from here"
+ },
+ "act.pathFrom.title": {
+  "ru": "сделать этот узел началом пути",
+  "en": "make this node the start of a path"
+ },
+ "act.pathTo": {
+  "ru": "путь сюда",
+  "en": "path to here"
+ },
+ "act.pathTo.title": {
+  "ru": "сделать этот узел концом пути",
+  "en": "make this node the end of a path"
+ },
+ "conc.0": {
+  "ru": "ранняя",
+  "en": "early"
+ },
+ "conc.1": {
+  "ru": "средняя («Этимологии»)",
+  "en": "middle (Etymologies)"
+ },
+ "conc.2": {
+  "ru": "поздняя",
+  "en": "late"
+ },
+ "path.none.apart": {
+  "ru": "Концы пути в разных концепциях ({a} и {b}), а переходы между концепциями запрещены.",
+  "en": "The ends are in different conceptions ({a} and {b}), and crossing conceptions is not allowed."
+ },
+ "rel.cognates": {
+  "ru": "когнат",
+  "en": "cognate"
+ },
+ "rel.cognates.long": {
+  "ru": "когнат в другом языке (раздел Cognates на странице Eldamo): сопоставление, не происхождение",
+  "en": "a cognate in another language (the Cognates section of Eldamo's page): comparison, not origin"
+ },
+ "card.cognates": {
+  "ru": "Когнаты ({n})",
+  "en": "Cognates ({n})"
+ },
+ "band.3": {
+  "ru": "ранняя концепция",
+  "en": "early conception"
+ },
+ "conc.3": {
+  "ru": "нео-эльдарин",
+  "en": "Neo-Eldarin"
+ },
+ "path.base": {
+  "ru": "основа:",
+  "en": "base:"
+ },
+ "path.base.title": {
+  "ru": "слово Толкина, из которого сделано это нео-слово (язык в скобках у его маркера); форма у него другая",
+  "en": "Tolkien's word this neo word is made from (the language in brackets by its marker); its form differs"
+ }
+}

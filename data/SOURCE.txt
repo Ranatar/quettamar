@@ -1,0 +1,3 @@
+eldamo-data.xml — Eldamo 0.8.13, https://github.com/pfstrack/eldamo (src/data/eldamo-data.xml, tag v0.8.13)
+sha256 4e561d4dfc15919d300adcb3ef8cb93298cb0b6fe0291f8fd1bef93abeea7979
+© 2008–2026 Paul Strack. Creative Commons Attribution 4.0 International: https://creativecommons.org/licenses/by/4.0/

@@ -1,0 +1,2855 @@
+<title>Neo-Roots Graph</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif:ital,wght@0,500;0,600;1,400;1,500&display=swap">
+<style>
+/* Layout: one-screen tool — a sidebar (search, card, legend) beside the graph; roots at the left, words to the right. */
+:root {
+  --bg: #eef1f4;
+  --panel: #fbfcfd;
+  --ink: #18212c;
+  --muted: #5a6676;
+  --line: #d3d9e1;
+  --accent: #2c5a86;
+  --focus: #18212c;
+
+  --n-root: #a8780a;
+  --n-root-soft: #a8780a66;
+  --n-nq: #13738a;
+  --n-ns: #3a8343;
+  --n-np: #6a55b0;
+  --n-form: #8893a2;
+
+  --e-deriv: #3b679c;
+  --e-element: #b9503f;
+  --e-combine: #74852f;
+  --e-see: #8893a2;
+  --e-deprecated: #b98320;
+  --e-cognate: #a8458a;
+  --e-cognates: #8a5fb0;
+  --e-merged: #a8780a;
+  --e-filed: #a8780a;
+  --e-rootderiv: #a8780a;
+  --e-instead: #9a7f5a;
+  --l-elvish: #b0612a;
+
+  --warn: #a5541d;
+  --ok: #2f7a45;
+
+  --f-form: "Noto Serif", "DejaVu Serif", Georgia, serif;
+  --f-ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", Consolas, "DejaVu Sans Mono", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11161d; --panel: #171e27; --ink: #e3e8ef; --muted: #96a2b2; --line: #2a3441; --accent: #8db8e4; --focus: #f1f4f8;
+    --n-root: #e2b34a; --n-root-soft: #e2b34a66; --n-nq: #49b6cc; --n-ns: #6dc07a; --n-np: #a593ea; --n-form: #7f8b9b;
+    --e-deriv: #7ba7dc; --e-element: #e88371; --e-combine: #aabd5c; --e-see: #7f8b9b; --e-deprecated: #e2ad4c;
+    --e-cognate: #dc7fc0; --e-cognates: #b796e0; --e-merged: #e2b34a; --e-filed: #e2b34a; --e-rootderiv: #e2b34a; --e-instead: #b9a17c; --l-elvish: #e39a5f;
+    --warn: #ea9157; --ok: #6dc07a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11161d; --panel: #171e27; --ink: #e3e8ef; --muted: #96a2b2; --line: #2a3441; --accent: #8db8e4; --focus: #f1f4f8;
+  --n-root: #e2b34a; --n-root-soft: #e2b34a66; --n-nq: #49b6cc; --n-ns: #6dc07a; --n-np: #a593ea; --n-form: #7f8b9b;
+  --e-deriv: #7ba7dc; --e-element: #e88371; --e-combine: #aabd5c; --e-see: #7f8b9b; --e-deprecated: #e2ad4c;
+  --e-cognate: #dc7fc0; --e-cognates: #b796e0; --e-merged: #e2b34a; --e-filed: #e2b34a; --e-rootderiv: #e2b34a; --e-instead: #b9a17c; --l-elvish: #e39a5f;
+  --warn: #ea9157; --ok: #6dc07a;
+  color-scheme: dark;
+}
+
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--f-ui); font-size: 14px; line-height: 1.45;
+  overflow: hidden;
+}
+.app {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(300px, 360px) 1fr;
+}
+.side {
+  min-width: 0;
+  display: flex; flex-direction: column; gap: 14px;
+  padding-block: 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: 16px;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  overflow-y: auto;
+}
+.brand { display: flex; flex-direction: column; gap: 2px; }
+.brand-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.btn.lang { flex: none; font-size: 12px; padding: 3px 8px; }
+.head-tools { display: flex; gap: 4px; flex: none; }
+.brand h1 { margin: 0; font-family: var(--f-form); font-weight: 600; font-size: 20px; letter-spacing: .01em; text-wrap: balance; }
+.brand .stat { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+.search { display: flex; flex-direction: column; gap: 6px; position: relative; }
+.search-row { display: flex; gap: 6px; }
+input[type="search"], select {
+  font: inherit; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; min-width: 0;
+}
+input[type="search"] { flex: 1; }
+input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 1px;
+}
+.results {
+  display: flex; flex-direction: column;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--panel);
+  max-height: 46vh; overflow-y: auto;
+}
+.results button {
+  all: unset; cursor: pointer; display: block; padding: 6px 9px;
+  border-bottom: 1px solid var(--line);
+}
+.results button:last-child { border-bottom: 0; }
+.results button:hover, .results button:focus-visible { background: var(--bg); }
+.results .none { padding: 8px 9px; color: var(--muted); }
+
+.mk { color: var(--muted); font-family: var(--f-form); font-size: .92em; }
+.fm { font-family: var(--f-form); font-style: italic; font-weight: 500; }
+.root-fm { font-style: normal; font-weight: 600; }
+.gl { color: var(--muted); }
+
+.card { display: flex; flex-direction: column; gap: 10px; }
+.card-head { display: flex; flex-direction: column; gap: 2px; }
+.card-head .big { font-family: var(--f-form); font-size: 24px; line-height: 1.2; overflow-wrap: anywhere; }
+.card .meta { color: var(--muted); font-size: 12.5px; }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.tag { font-size: 11.5px; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.tag.ok { color: var(--ok); border-color: currentColor; }
+.tag.warn { color: var(--warn); border-color: currentColor; }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.btn {
+  font: inherit; font-size: 12.5px; cursor: pointer;
+  color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 6px; padding: 5px 9px;
+}
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--panel); border-color: var(--accent); }
+a.ext { color: var(--accent); font-size: 12.5px; }
+.sec h3 {
+  margin: 0 0 4px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+}
+.links { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.links li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; }
+.links .rel { font-size: 11.5px; padding: 0 6px; border-radius: 4px; border: 1px solid currentColor; }
+.links button { all: unset; cursor: pointer; }
+.links button:hover .fm, .links button:focus-visible .fm { text-decoration: underline; }
+.written { flex-basis: 100%; padding-left: 12px; font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); overflow-wrap: anywhere; }
+.more { color: var(--muted); font-size: 12px; }
+
+.legend { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--line); padding-top: 12px; }
+.legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+.legend label { display: flex; align-items: center; gap: 6px; font-size: 12.5px; cursor: pointer; }
+.legend svg { flex: none; overflow: visible; }
+.hint { color: var(--muted); font-size: 12px; }
+
+.stage { position: relative; min-width: 0; min-height: 0; }
+#graph { width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+#graph:active { cursor: grabbing; }
+/* both views are drawn on canvases over the svg, which takes the pointer (zoom, pan, picking) */
+#gr-canvas, #ov-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#graph.hover { cursor: pointer; }
+.ov-tip {
+  position: absolute; z-index: 5; max-width: 320px; padding: 6px 9px; border-radius: 6px; pointer-events: none;
+  background: var(--panel); color: var(--ink); border: 1px solid var(--line); box-shadow: 0 2px 8px rgb(0 0 0 / .12);
+  font-size: 12.5px; white-space: pre-line;
+}
+.stage-bar {
+  position: absolute; top: 12px; left: 12px; right: max(12px, env(safe-area-inset-right, 0px));
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 8px;
+  pointer-events: none;
+}
+.stage-bar > * { pointer-events: auto; }
+.stage-tools { display: flex; gap: 6px; }
+.seg { display: flex; }
+.seg .btn { border-radius: 0; }
+.seg .btn:first-child { border-radius: 6px 0 0 6px; }
+.seg .btn:last-child { border-radius: 0 6px 6px 0; border-left: 0; }
+.seg .btn[aria-pressed="true"] { background: var(--accent); color: var(--panel); border-color: var(--accent); }
+.stage-left { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-width: 0; }
+.ov-tools {
+  width: 250px; max-width: 100%;
+  display: flex; flex-direction: column; gap: 5px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+  font-size: 12.5px;
+}
+.ov-tools label { display: flex; gap: 6px; align-items: center; cursor: pointer; }
+.ov-head { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+.ov-cat > circle { fill: none; stroke: var(--line); stroke-dasharray: 3 3; }
+.ov-cat > text { fill: var(--muted); font-family: var(--f-ui); font-weight: 600; text-anchor: middle; }
+.ov-hint { margin: 2px 0 0; color: var(--muted); font-size: 11.5px; }
+.ov-group circle { fill: var(--line); fill-opacity: .25; stroke: var(--line); }
+.ov-group text { fill: var(--muted); font-family: var(--f-form); font-weight: 600; opacity: .55; }
+.ov-leaf { cursor: pointer; }
+.ov-leaf text { font-family: var(--f-form); font-weight: 600; fill: var(--ink); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.ov-leaf.sel circle { stroke: var(--focus); stroke-width: 2.2; }
+.stage-note {
+  position: absolute; left: 12px; bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px;
+}
+
+.export { position: relative; }
+/* the path between two words */
+.pathbox { margin: 10px 0 4px; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px 8px; background: var(--panel); }
+.pathbox > summary { cursor: pointer; font-weight: 600; font-size: 13px; padding: 2px 0; }
+.pathbox[open] > summary { margin-bottom: 8px; }
+.path-ends { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; gap: 6px; align-items: center; }
+.path-ends .path-end:first-child { grid-column: 1; grid-row: 1; }
+.path-ends #path-swap { grid-column: 2; grid-row: 1 / span 2; }
+.path-ends .path-end:last-child { grid-column: 1; grid-row: 2; }
+.path-end { position: relative; display: flex; flex-direction: column; }
+.path-end input { width: 100%; box-sizing: border-box; }
+.path-end .results { position: absolute; top: 100%; left: 0; right: 0; z-index: 4; max-height: 40vh; }
+.pathbox .par-mode { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; font-size: 12.5px; }
+.path-tools { display: flex; gap: 6px; margin-top: 8px; }
+.path-one { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); }
+.path-one.alt { opacity: .85; }
+.path-one.on { opacity: 1; }
+.path-head { font-weight: 600; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.path-sum { font-size: 12.5px; margin: 2px 0 4px; }
+.path-lead { font-size: 12.5px; margin-bottom: 4px; }
+.path-lead button { all: unset; cursor: pointer; }
+.path-lead button:hover .fm { text-decoration: underline; }
+.path-steps .arr { color: var(--muted); font-family: var(--f-ui); }
+.path-base { font-family: var(--f-ui); }
+.path-base button { font-size: 13px; }
+.tag.cross { border-color: var(--warn); color: var(--warn); }
+.export-menu {
+  position: absolute; right: 0; top: calc(100% + 4px); z-index: 6; display: flex; flex-direction: column; gap: 2px;
+  min-width: 190px; padding: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / .12);
+}
+.export-menu button { all: unset; padding: 5px 8px; border-radius: 4px; font-size: 12.5px; cursor: pointer; color: var(--ink); }
+.export-menu button:hover, .export-menu button:focus-visible { background: var(--bg); }
+.edge-card .arrow { color: var(--muted); margin: 0 4px; }
+.links button.dep, .links button.oth, .links button.nam { opacity: .7; }
+.switches label { display: flex; align-items: flex-start; gap: 6px; font-size: 12.5px; cursor: pointer; margin-bottom: 4px; }
+.switches input { margin-top: 3px; }
+.switches .par-mode { flex-direction: column; align-items: stretch; gap: 4px; cursor: default; }
+.langs { display: flex; flex-direction: column; gap: 8px; }
+.lang-group { display: flex; flex-direction: column; gap: 2px; }
+.lang-group > label { font-weight: 600; }
+.lang-items { display: flex; flex-direction: column; gap: 1px; padding-left: 18px; }
+.langs label { display: flex; align-items: baseline; gap: 5px; font-size: 12.5px; cursor: pointer; }
+.langs .cnt { margin-left: auto; color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.legend .sc-toggle { align-items: flex-start; margin-top: 8px; color: var(--muted); }
+.legend .sc-toggle input { margin-top: 3px; }
+
+@media (max-width: 760px) {
+  html, body { height: auto; }
+  body { overflow: auto; }
+  .app {
+    display: flex; flex-direction: column; gap: 14px; height: auto;
+    padding-block: 16px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    background: var(--panel);
+  }
+  .side { display: contents; }
+  .brand { order: 1; }
+  .search { order: 2; }
+  .stage { order: 3; height: 70svh; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); overflow: hidden; }
+  .card { order: 4; }
+  .pathbox { order: 5; }
+  .ov-hint { display: none; }
+  .legend { order: 6; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="brand-row">
+        <h1 data-i18n="page.h1">Корни нео-эльдарина</h1>
+        <div class="head-tools">
+          <button class="btn lang" id="theme-toggle" type="button"></button>
+          <button class="btn lang" id="lang-toggle" type="button" data-i18n="lang.switch" data-i18n-attr="title:lang.title">English</button>
+        </div>
+      </div>
+      <div class="stat" id="stat"></div>
+    </div>
+
+    <div class="search">
+      <div class="search-row">
+        <input type="search" id="q" placeholder="Слово, корень или значение" autocomplete="off" spellcheck="false" aria-label="Поиск" data-i18n-attr="placeholder:search.placeholder;aria-label:search.label">
+        <select id="scope" aria-label="Где искать" data-i18n-attr="aria-label:scope.label">
+          <option value="" data-i18n="scope.all">всё</option>
+          <option value="nq">ᴺQ.</option>
+          <option value="ns">ᴺS.</option>
+          <option value="np">ᴺ✶</option>
+          <option value="root" data-i18n="scope.roots">корни</option>
+        </select>
+      </div>
+      <div class="results" id="results" hidden></div>
+    </div>
+
+    <details class="pathbox" id="path-box">
+      <summary data-i18n="path.title">Путь между словами</summary>
+      <div class="path-ends">
+        <div class="path-end"><input type="search" id="path-a" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:path.from;aria-label:path.from" placeholder="от слова или корня"><div class="results" id="path-a-res" hidden></div></div>
+        <button class="btn" id="path-swap" type="button" data-i18n-attr="title:path.swap;aria-label:path.swap" title="поменять местами">⇅</button>
+        <div class="path-end"><input type="search" id="path-b" autocomplete="off" spellcheck="false" data-i18n-attr="placeholder:path.to;aria-label:path.to" placeholder="до слова или корня"><div class="results" id="path-b-res" hidden></div></div>
+      </div>
+      <label class="par-mode"><span data-i18n="path.mode">Что искать</span>
+        <select id="path-mode">
+          <option value="kin" data-i18n="path.mode.kin">родство: ближайший общий источник</option>
+          <option value="origin" data-i18n="path.mode.origin">происхождение: одно из другого</option>
+          <option value="any" data-i18n="path.mode.any">любая связь</option>
+        </select>
+      </label>
+      <label class="par-mode"><span data-i18n="path.policy">Переходы между концепциями и ветвями</span>
+        <select id="path-policy">
+          <option value="fewest" data-i18n="path.policy.fewest">как можно меньше (сначала концепции, потом ветви)</option>
+          <option value="none" data-i18n="path.policy.none">запрещены: внутри одной концепции и ветви</option>
+          <option value="conceptions-not" data-i18n="path.policy.conceptionsNot">только между ветвями</option>
+          <option value="branches-not" data-i18n="path.policy.branchesNot">только между концепциями</option>
+          <option value="any" data-i18n="path.policy.any">не учитывать: кратчайший путь</option>
+        </select>
+      </label>
+      <label class="sc-toggle"><input type="checkbox" id="path-loose"> <span data-i18n="path.loose">и через нестрогие связи (см., когнат, вместо него, зачёркнутые ссылки)</span></label>
+      <div class="path-tools">
+        <button class="btn primary" id="path-find" type="button" data-i18n="path.find">Найти</button>
+        <button class="btn" id="path-clear" type="button" data-i18n="path.clear">Сбросить</button>
+      </div>
+      <div id="path-out" aria-live="polite"></div>
+    </details>
+
+    <section class="card" id="card" aria-live="polite"></section>
+
+    <section class="legend">
+      <div class="sec">
+        <h3 data-i18n="legend.nodes">Узлы</h3>
+        <div class="legend-grid" id="legend-nodes"></div>
+      </div>
+      <div class="sec">
+        <h3 data-i18n="legend.edges">Связи (от источника к производному)</h3>
+        <div class="legend-grid" id="legend-edges"></div>
+        <label class="sc-toggle"><input type="checkbox" id="shortcuts"> <span data-i18n="legend.shortcuts">показывать прямые связи корня со словом, если тот же корень ведёт к слову и через промежуточную форму</span></label>
+      </div>
+      <div class="sec switches">
+        <h3 data-i18n="legend.show">Показывать</h3>
+        <label class="par-mode"><span data-i18n="vocab.label">Словарь</span>
+          <select id="vocab">
+            <option value="neo" data-i18n="vocab.neo">нео-эльдарин: неологизмы, замены и ⚠ (как Eldamo с ?neo)</option>
+            <option value="tolkien" data-i18n="vocab.tolkien">только Толкин (как Eldamo без ?neo)</option>
+          </select>
+        </label>
+        <label><input type="checkbox" id="show-dep"> <span data-i18n="filter.deprecated">заменённые слова (Eldamo не советует их для нео-эльдарина)</span></label>
+        <label><input type="checkbox" id="show-nam"> <span data-i18n="filter.names">имена (места, лица, народы)</span></label>
+        <label><input type="checkbox" id="show-oth"> <span data-i18n="filter.other">прочие слова с ⚠️ вне перечней (ранние, отвергнутые, вычеркнутые, без значения)</span></label>
+        <label class="par-mode"><span data-i18n="par.label">Формы других концепций</span>
+          <select id="par-mode">
+            <option value="bands" data-i18n="par.bands">полосами: поздняя, средняя, ранняя</option>
+            <option value="stack" data-i18n="par.stack">под своим словом, как на странице Eldamo</option>
+            <option value="free" data-i18n="par.free">отдельно, обычными стрелками</option>
+          </select>
+        </label>
+        <label class="par-mode"><span data-i18n="order.label">Порядок в столбце</span>
+          <select id="col-order">
+            <option value="source" data-i18n="order.source">по источникам, внутри — по ветвям</option>
+            <option value="branch" data-i18n="order.branch">по ветвям, внутри — по источникам</option>
+            <option value="alpha" data-i18n="order.alpha">по алфавиту</option>
+          </select>
+        </label>
+      </div>
+      <div class="sec">
+        <h3 data-i18n="legend.langs">Языки</h3>
+        <div class="langs" id="legend-langs"></div>
+      </div>
+      <p class="hint" data-i18n="legend.hint">Щелчок — карточка узла, двойной щелчок — развернуть соседей. Число «+N» у подписи — сколько связей узла ещё не показано. Колёсико и перетаскивание фона — масштаб и сдвиг.</p>
+    </section>
+  </aside>
+
+  <main class="stage">
+    <svg id="graph" role="img" aria-label="Граф происхождения слов и корней" data-i18n-attr="aria-label:page.graphLabel"></svg>
+    <canvas id="gr-canvas"></canvas>
+    <canvas id="ov-canvas" hidden></canvas>
+    <div class="ov-tip" id="ov-tip" role="tooltip" hidden></div>
+    <div class="stage-bar">
+      <div class="stage-left">
+      <div class="seg" role="group" data-i18n-attr="aria-label:mode.label" aria-label="Вид">
+        <button class="btn" id="mode-graph" type="button" data-i18n="mode.graph" aria-pressed="true">Граф</button>
+        <button class="btn" id="mode-roots" type="button" data-i18n="mode.roots" aria-pressed="false">Все корни</button>
+      </div>
+      <div class="ov-tools" id="ov-tools" hidden>
+        <div class="ov-head" data-i18n="ov.show">Показать</div>
+        <label><input type="checkbox" id="ov-roots" checked> <span data-i18n="ov.show.roots">корни</span></label>
+        <label><input type="checkbox" id="ov-proto"> <span data-i18n="ov.show.proto">праформы без корня</span></label>
+        <label><input type="checkbox" id="ov-words"> <span data-i18n="ov.show.words">прочие слова без корня</span></label>
+        <div class="ov-head" data-i18n="ov.rootFilters">Корни</div>
+        <label><input type="checkbox" id="ov-rec"> <span data-i18n="ov.recommended">только рекомендованные</span></label>
+        <label><input type="checkbox" id="ov-free"> <span data-i18n="ov.free">только без производных</span></label>
+        <p class="ov-hint" data-i18n="ov.hint"></p>
+      </div>
+      </div>
+      <div class="stage-tools">
+        <button class="btn" id="fit" type="button" data-i18n="tools.fit">Вписать</button>
+        <button class="btn" id="relayout" type="button" data-i18n="tools.relayout">Перестроить</button>
+        <div class="export">
+          <button class="btn" id="export" type="button" aria-haspopup="true" aria-expanded="false" data-i18n="export.label">Экспорт</button>
+          <div class="export-menu" id="export-menu" hidden>
+            <button type="button" data-exp="svg" data-mode="graph" data-i18n="export.svg">SVG</button>
+            <button type="button" data-exp="png" data-mode="graph" data-i18n="export.png">PNG</button>
+            <button type="button" data-exp="json" data-mode="graph" data-i18n="export.json">JSON</button>
+            <button type="button" data-exp="map" data-mode="roots" data-i18n="export.map">PNG</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="stage-note" id="note"></div>
+  </main>
+</div>
+
+<script type="application/json" id="graph-data">/*GRAPH*/</script>
+<script type="application/json" id="messages-data">/*MESSAGES*/</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+(function () {
+'use strict';
+const G = JSON.parse(document.getElementById('graph-data').textContent);
+const N = G.nodes.length;
+const SITE = 'https://eldamo.org/content/words/word-';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------------------------------------------------------------- interface language
+// The catalog (graph_messages.json, embedded by make_graph.py) maps a key to {ru, en};
+// placeholders are {name}. Eldamo's data (forms, glosses) are not translated. The choice
+// is kept in the browser; without one, the browser's language decides. A switch redraws
+// the page in place, so the open graph stays.
+const MESSAGES = JSON.parse(document.getElementById('messages-data').textContent);
+const LANG_KEY = 'neo-roots-lang';
+let uiLang = (() => {
+  try { const v = localStorage.getItem(LANG_KEY); if (v === 'ru' || v === 'en') return v; } catch (e) { /* storage unavailable */ }
+  const nav = (navigator.languages && navigator.languages[0]) || navigator.language || 'ru';
+  return /^(ru|uk|be|kk)\b/i.test(nav) ? 'ru' : 'en';
+})();
+function t(key, params) {
+  const e = MESSAGES[key];
+  if (!e) { console.warn('i18n: no message', key); return key; }
+  const text = e[uiLang] != null ? e[uiLang] : e.ru;
+  return params ? text.replace(/\{(\w+)\}/g, (m, k) => (params[k] != null ? String(params[k]) : m)) : text;
+}
+const has = key => Object.prototype.hasOwnProperty.call(MESSAGES, key);
+function translateStatic() {
+  document.documentElement.lang = uiLang;
+  for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = t(el.dataset.i18n);
+  for (const el of document.querySelectorAll('[data-i18n-attr]')) {
+    for (const pair of el.dataset.i18nAttr.split(';')) {
+      const [attr, key] = pair.split(':');
+      if (attr && key) el.setAttribute(attr.trim(), t(key.trim()));
+    }
+  }
+}
+const num = n => n.toLocaleString(uiLang === 'ru' ? 'ru-RU' : 'en-GB');
+
+// ---------------------------------------------------------------- vocabulary
+const LANG = {
+  q: ['Q.', 'Quenya'], mq: ['ᴹQ.', 'Middle Quenya'], eq: ['ᴱQ.', 'Early Quenya'], nq: ['ᴺQ.', 'Neo-Quenya'],
+  s: ['S.', 'Sindarin'], n: ['N.', 'Noldorin'], en: ['ᴱN.', 'Early Noldorin'], g: ['G.', 'Gnomish'], ns: ['ᴺS.', 'Neo-Sindarin'],
+  on: ['ON.', 'Old Noldorin'], os: ['OS.', 'Old Sindarin'], t: ['T.', 'Telerin'], mt: ['ᴹT.', 'Middle Telerin'], et: ['ᴱT.', 'Early Telerin'],
+  ilk: ['Ilk.', 'Ilkorin'], eilk: ['ᴱIlk.', 'Early Ilkorin'], dan: ['Dan.', 'Danian'], nan: ['Nan.', 'Nandorin'],
+  aq: ['AQ.', 'Ancient Quenya'], maq: ['ᴹAQ.', 'Middle Ancient Quenya'], at: ['AT.', 'Ancient Telerin'], van: ['Van.', 'Vanyarin'],
+  norths: ['North S.', 'North Sindarin'], ad: ['Ad.', 'Adûnaic'], av: ['Av.', 'Avarin'], lem: ['Lem.', 'Lemberin'], lin: ['Lin.', 'Lindarin'],
+  p: ['✶', 'Primitive Elvish'], mp: ['ᴹ✶', 'Middle Primitive Elvish'], ep: ['ᴱ✶', 'Early Primitive Elvish'], np: ['ᴺ✶', 'Neo-Primitive Elvish'],
+};
+const ROOT_MARK = { p: '√', mp: 'ᴹ√', ep: 'ᴱ√', np: 'ᴺ√' };
+// relation names: [short, long]
+const REL = new Proxy({}, { get: (_, r) => [t('rel.' + r), t('rel.' + r + '.long')] });
+const langName = code => has('langname.' + code) ? t('langname.' + code) : (LANG[code] ? LANG[code][1] : code);
+// a word with several parts of speech ("n adj") shows each
+const speech = s => String(s).split(/\s+/).map(x => has('speech.' + x) ? t('speech.' + x) : x).join(' ');
+
+// the colour tokens, read once per theme (recolor() forgets them): the canvas asks for them on every frame
+const cssCache = new Map();
+const css = name => {
+  let v = cssCache.get(name);
+  if (v === undefined) { v = getComputedStyle(document.documentElement).getPropertyValue(name).trim(); cssCache.set(name, v); }
+  return v;
+};
+const relName = k => G.rels[k];
+const RELS_INSTEAD = G.rels.indexOf('instead');
+const RELS_COMBINE = G.rels.indexOf('combine');
+
+// ---------------------------------------------------------------- the graph
+const inE = Array.from({ length: N }, () => []);
+const outE = Array.from({ length: N }, () => []);
+G.edges.forEach((e, k) => { outE[e[0]].push(k); inE[e[1]].push(k); });
+const indexOf = new Map(G.ids.map((x, i) => [x, i]));
+const kindOf = i => G.nodes[i].k;
+const isRoot = i => kindOf(i) === 'root';
+const isListed = n => !!n.grp && !n.x;          // a word of the three lists (not deprecated, not a merged form)
+
+function codeMarker(code, root) {
+  return root ? (ROOT_MARK[code] || '√') : (LANG[code] || [code ? code.toUpperCase() + '.' : ''])[0];
+}
+// the language Eldamo prints in brackets (c:alt-lang): ᴺQ.[ᴱQ.]; the same language twice (ᴹ√[ᴹ√])
+// says nothing on the graph, so the bracket shows only another one
+const altLang = n => (n.al && n.al !== n.l ? n.al : null);
+function marker(i) {
+  const n = G.nodes[i], al = altLang(n);
+  return codeMarker(n.l, n.k === 'root') + (al ? '[' + codeMarker(al, n.k === 'root') + ']' : '');
+}
+function shown(i) {           // the NQ list shows its own spelling
+  const n = G.nodes[i];
+  return n.sp || n.f || '?';
+}
+function nodeColor(i) {
+  const n = G.nodes[i];
+  if (n.k === 'root') return css('--n-root');
+  if (n.grp) return css('--n-' + n.grp);
+  if (n.k === 'protoform') return css('--n-np');
+  return css('--n-form');
+}
+
+// ---- languages: branch (the hue of a marker) and period (its strength: early faint, neo full)
+const BRANCH = {
+  quenya: ['nq', 'q', 'mq', 'eq', 'van', 'aq', 'maq'],
+  sindarin: ['ns', 's', 'n', 'en', 'g', 'norths', 'os', 'on'],
+  primitive: ['np', 'p', 'mp', 'ep'],
+  elvish: ['t', 'mt', 'et', 'at', 'nan', 'ilk', 'eilk', 'dan', 'lem', 'lin', 'av'],
+};
+const BRANCH_TOKEN = { quenya: '--n-nq', sindarin: '--n-ns', primitive: '--n-np', elvish: '--l-elvish', other: '--n-form' };
+const branchOf = code => Object.keys(BRANCH).find(b => BRANCH[b].includes(code)) || 'other';
+const EARLY = new Set(['eq', 'en', 'g', 'ep', 'et', 'eilk']);
+const MIDDLE = new Set(['mq', 'n', 'mp', 'mt', 'ilk', 'dan', 'on', 'maq', 'lem']);
+const NEO = new Set(['nq', 'ns', 'np']);
+const eraOf = code => (NEO.has(code) ? 3 : EARLY.has(code) ? 0 : MIDDLE.has(code) ? 1 : 2);
+// the hue is the branch's; saturation and strength grow from early to neo (on a light page a
+// newer language is deeper, on a dark one brighter), so even an early marker keeps its hue
+const HUE = { quenya: 190, sindarin: 132, primitive: 266, elvish: 24, other: 215 };
+const colorCache = new Map();
+function langColor(code, root) {
+  const key = code + (root ? '√' : '');
+  if (!colorCache.has(key)) {
+    const dark = d3.hsl(css('--bg')).l < 0.5, e = eraOf(code), b = branchOf(code);
+    const h = root ? 42 : HUE[b];
+    const sat = b === 'other' && !root ? 0.15 : [0.42, 0.6, 0.78, 0.92][e];
+    const light = dark ? [0.5, 0.6, 0.69, 0.78][e] : [0.58, 0.46, 0.36, 0.28][e];
+    colorCache.set(key, d3.hsl(h, sat, light).formatHex());
+  }
+  return colorCache.get(key);
+}
+// a marker as html, coloured by language
+function markerHtml(i) {
+  const n = G.nodes[i], root = n.k === 'root', al = altLang(n);
+  return `<span class="mk" style="color:${langColor(n.l, root)}">${esc(codeMarker(n.l, root))}</span>`
+    + (al ? `<span class="mk" style="color:${langColor(al, root)}">[${esc(codeMarker(al, root))}]</span>` : '');
+}
+
+// ---- what is shown
+const relOn = Object.fromEntries(G.rels.map(r => [r, true]));
+// a root named directly beside a path through an intermediate form (Q. -(n)dur < √(N)DUR and
+// < ✶-ndūr < √(N)DUR): hidden unless switched on, so the path through the form shows
+let showShortcuts = false;
+let showDeprecated = false;     // Eldamo's deprecated words
+let showOther = false;          // other words Eldamo marks ⚠️ and lists nowhere
+let showNames = false;          // names (places, persons, peoples)
+// forms of other conceptions: 'bands' -- one column with their word, the conceptions in horizontal
+// bands (late with neo, middle, early); 'stack' -- under their word, as on Eldamo's page; 'free'
+let parMode = 'bands';
+// the order of a column: 'source' -- by where the sources stand, the derivatives of one source by
+// branch; 'branch' -- by branch (Quenya on top, then Sindarin...), within it by sources; 'alpha'
+let colOrder = (() => { try { const v = localStorage.getItem('neo-roots-order'); return ['source', 'branch', 'alpha'].includes(v) ? v : 'source'; } catch (e) { return 'source'; } })();
+const langOn = {};              // a language switched off in the legend: false
+const isShortcut = e => !!(e[3] && e[3].sc);
+const edgeOn = k => relOn[relName(G.edges[k][2])] && (showShortcuts || !isShortcut(G.edges[k]))
+  && !(tolkien() && (G.edges[k][2] === RELS_INSTEAD || G.edges[k][2] === RELS_COMBINE));
+// links of origin, and the links of one word across conceptions (a word and the forms merged into
+// it, a root and the roots merged into or filed under it)
+const ORIGIN = new Set(['deriv', 'element', 'combine', 'see', 'deprecated', 'cognate']);
+const PARALLEL = new Set(['combine', 'merged', 'filed']);
+// the vocabulary: 'neo' -- Neo-Eldarin, as Eldamo's pages with ?neo (neologisms, deprecations and
+// replacements, ⚠); 'tolkien' -- Tolkien's words only, as Eldamo's pages without it: no ᴺQ., ᴺS., ᴺ✶,
+// ᴺ√, and the words Eldamo deprecates for Neo-Eldarin are ordinary words of their languages. So are the
+// words merged (<combine>) into another for Neo-Eldarin: with ?neo Eldamo sends their pages on to that word
+// (ᴱQ. aiko to ᴺQ.[ᴱQ.] aico), without it each is a word of its own language, and the merge is not shown
+let vocab = (() => { try { return localStorage.getItem('neo-roots-vocab') === 'tolkien' ? 'tolkien' : 'neo'; } catch (e) { return 'neo'; } })();
+const tolkien = () => vocab === 'tolkien';
+// whether a word of its kind is shown (the switches of the legend and the vocabulary)
+function kindShown(n) {
+  if (tolkien() && NEO.has(n.l)) return false;
+  if (n.x === 'd') return tolkien() || showDeprecated;
+  if (n.x === 'o') return tolkien() || showOther || !!n.iv;
+  if (n.x === 'n') return showNames || !!n.iv;
+  return true;
+}
+const passes = i => {
+  const n = G.nodes[i];
+  return langOn[n.l] !== false && kindShown(n);
+};
+
+// ---------------------------------------------------------------- state
+const visible = new Set();
+let focusNode = -1, selected = -1;
+// what keeps each node on the graph: 'core' (the focus and its tree) or the nodes whose expansion
+// added it; collapsing a node removes what only it keeps
+const owners = new Map();
+const expanded = new Set();
+function own(x, by) { if (!owners.has(x)) owners.set(x, new Set()); owners.get(x).add(by); }
+const pos = new Map();          // node -> {x, y, vx, vy, fx, fy}; a dragged node keeps fx, fy
+
+// links not shown yet, by side: to the sources (what the node comes from: its earlier forms, its
+// elements, the forms merged into it, its cognates, the root it is filed under) and to the derivatives
+const RELS_COGNATES = G.rels.indexOf('cognates');
+const isCognates = k => G.edges[k][2] === RELS_COGNATES;
+function hiddenIn(i) {
+  let h = 0;
+  for (const k of inE[i]) if (!isCognates(k) && edgeOn(k) && !visible.has(G.edges[k][0]) && passes(G.edges[k][0])) h++;
+  return h;
+}
+function hiddenOut(i) {
+  let h = 0;
+  for (const k of outE[i]) if (!isCognates(k) && edgeOn(k) && !visible.has(G.edges[k][1]) && passes(G.edges[k][1])) h++;
+  return h;
+}
+
+function upstream(i, cap) {
+  const out = [i], seen = new Set([i]);
+  for (let q = 0; q < out.length && out.length < cap; q++) {
+    if (q > 0 && isRoot(out[q])) continue;      // a root's own merges and filing open on expand
+    for (const k of inE[out[q]]) {
+      if (!edgeOn(k) || relName(G.edges[k][2]) === 'instead' || isCognates(k)) continue;   // a replacement, a cognate: not origins
+      const a = G.edges[k][0];
+      if (!seen.has(a)) { seen.add(a); out.push(a); }
+    }
+  }
+  return out;
+}
+function downstream(i, depth, cap) {
+  let layer = [i];
+  const out = [], seen = new Set([i]);
+  for (let d = 0; d < depth && layer.length; d++) {
+    const next = [];
+    for (const x of layer) {
+      for (const k of outE[x]) {
+        if (!edgeOn(k) || isCognates(k)) continue;
+        const b = G.edges[k][1];
+        if (seen.has(b) || !passes(b)) continue;
+        if (out.length >= cap) return out;
+        seen.add(b); out.push(b); next.push(b);
+      }
+    }
+    layer = next;
+  }
+  return out;
+}
+
+function focus(i, keep) {
+  if (i < 0) return;
+  unknownMsg = '';
+  if (!keep) { visible.clear(); pos.clear(); owners.clear(); expanded.clear(); }
+  setMode('graph');
+  focusNode = i;
+  for (const x of upstream(i, 300)) { visible.add(x); own(x, 'core'); }
+  const down = isRoot(i) ? downstream(i, 2, 160) : downstream(i, 1, 40);
+  for (const x of down) { visible.add(x); own(x, 'core'); }
+  // and its cognates (the Cognates section of its page), of whatever kind (S. Edhelharn ~ Q. Elessar,
+  // both names); the languages switched off in the legend still apply
+  cognateKeep.clear();
+  for (const k of [...inE[i], ...outE[i]]) {
+    if (!isCognates(k) || !edgeOn(k)) continue;
+    const x = G.edges[k][0] === i ? G.edges[k][1] : G.edges[k][0];
+    visible.add(x); own(x, 'core'); cognateKeep.add(x);
+  }
+  select(i);
+  try { history.replaceState(null, '', '#n-' + G.ids[i]); } catch (e) { /* the frame may refuse */ }
+  render(true);
+}
+// dir: 'all', 'in' (the sources only) or 'out' (the derivatives only)
+function expand(i, dir = 'all') {
+  const around = [];
+  if (dir !== 'out') for (const k of inE[i]) if (edgeOn(k) && (dir === 'all' || !isCognates(k))) around.push(G.edges[k][0]);
+  let added = 0;
+  for (const k of dir === 'in' ? [] : outE[i]) {
+    if (!edgeOn(k) || (dir !== 'all' && isCognates(k))) continue;
+    if (added >= 80) break;
+    const b = G.edges[k][1];
+    if (!visible.has(b) && passes(b)) added++;
+    around.push(b);
+  }
+  const p = pos.get(i);
+  expanded.add(i);
+  for (const x of around) {
+    if (x === i) continue;
+    if (!visible.has(x) && p && !pos.has(x)) pos.set(x, { x: p.x + (Math.random() - .5) * 40, y: p.y + (Math.random() - .5) * 40 });
+    visible.add(x);
+    own(x, i);
+  }
+  render(false);
+}
+function drop(i) {
+  for (const s of owners.values()) s.delete(i);
+  visible.delete(i); pos.delete(i); owners.delete(i);
+}
+// undo an expansion: the nodes only it keeps go, and what they expanded with them
+function collapseFrom(i) {
+  expanded.delete(i);
+  for (const [x, by] of [...owners]) {
+    if (!by.has(i)) continue;
+    by.delete(i);
+    if (by.size || x === focusNode) continue;
+    if (expanded.has(x)) collapseFrom(x);
+    drop(x);
+  }
+}
+function collapse(i) {
+  collapseFrom(i);
+  if (!visible.has(selected)) select(visible.has(i) ? i : focusNode);
+  render(false);
+}
+function toggle(i) {
+  if (expanded.has(i)) collapse(i); else expand(i);
+}
+// one side: opens what is hidden there; with nothing hidden there, collapses what the node expanded
+function toggleSide(i, dir) {
+  if ((dir === 'in' ? hiddenIn(i) : hiddenOut(i)) > 0) expand(i, dir);
+  else if (expanded.has(i)) collapse(i);
+}
+function removeNode(i) {
+  if (i === focusNode) return;
+  if (expanded.has(i)) collapseFrom(i);
+  drop(i);
+  if (selected === i || !visible.has(selected)) select(focusNode);
+  render(false);
+}
+
+// ---------------------------------------------------------------- layout and drawing
+// The graph is drawn on a canvas under the svg, which (empty in this view) takes the pointer: the zoom
+// and pan, the picking of nodes and links by their geometry. With hundreds of nodes an svg laid out
+// every label anew on each step of a zoom or a layout; a canvas only paints
+const svg = d3.select('#graph');
+const grCanvas = $('gr-canvas');
+let mode = 'graph';
+// a node is dragged with what hangs on it alone (its derivatives without another parent on the graph);
+// with Shift alone. What is moved stays where it is put; "Re-layout" frees it. The drag begins with the
+// first move: a click alone neither wakes the layout nor pins the node. Set before the zoom, so that a
+// press on a node is the node's and not a pan
+svg.call(d3.drag()
+  .filter(ev => mode === 'graph' && !ev.ctrlKey && !ev.button)
+  .subject(ev => {
+    const tr = d3.zoomTransform(svg.node());
+    const d = nodeAt(...tr.invert([ev.x, ev.y]), tr.k);
+    // d3.drag keeps the grip as subject minus pointer, both in the svg's own (screen) units
+    return d ? { d, x: tr.applyX(d.x), y: tr.applyY(d.y) } : null;
+  })
+  .on('start', ev => {
+    const s = ev.subject;
+    s.x0 = ev.x; s.y0 = ev.y; s.shift = !!(ev.sourceEvent && ev.sourceEvent.shiftKey);
+  })
+  .on('drag', ev => {
+    const s = ev.subject, d = s.d;
+    if (!s.moved) {
+      if (ev.x === s.x0 && ev.y === s.y0) return;
+      s.moved = true;
+      hideTip();
+      if (sim) { settled = false; sim.alphaTarget(0.1).restart(); }
+      s.group = s.shift ? [d] : dependents(d);
+      for (const m of s.group) { m._dx = m.x - d.x; m._dy = m.y - d.y; m.fx = m.x; m.fy = m.y; }
+    }
+    const [gx, gy] = d3.zoomTransform(svg.node()).invert([ev.x, ev.y]);
+    for (const m of s.group) { m.fx = gx + m._dx; m.fy = clampY(m, gy + m._dy); }
+  })
+  .on('end', ev => { if (ev.subject.moved && sim) sim.alphaTarget(0); grRequestDraw(); }));
+const zoom = d3.zoom().scaleExtent([0.08, 40]).on('zoom', () => {
+  if (mode === 'graph') grRequestDraw();
+  else ovRequestDraw();
+});
+svg.call(zoom).on('dblclick.zoom', null);
+
+const DASH = { deriv: null, element: null, combine: '2 3', see: '1 3', deprecated: '6 4', cognate: '6 3 1 3', cognates: '5 2 1 2', merged: '1 3', filed: '4 3', rootderiv: null, instead: '3 3' };
+
+let COL = 230;
+const STACK = 36;              // the step between a word and the forms under it
+const BOX_H = 30;              // the height of a node with its label above
+let sim = null;
+let shownNodes = new Set();
+
+// the links among the shown nodes; a path through hidden nodes (a language switched off, a
+// deprecated word) becomes one link "through hidden nodes" with the relation of its last step
+function shownLinks(shownSet) {
+  const edges = [], real = new Set(), virtual = new Map();
+  for (const a of shownSet) {
+    for (const k of outE[a]) {
+      if (!edgeOn(k)) continue;
+      const e = G.edges[k], b = e[1], rel = relName(e[2]);
+      if (!visible.has(b)) continue;
+      if (shownSet.has(b)) { edges.push({ k, a, b, rel, x: e[3] || null }); real.add(a + '>' + b); continue; }
+      if (!ORIGIN.has(rel) && !PARALLEL.has(rel)) continue;
+      const stack = [b], seen = new Set([b]);
+      while (stack.length) {
+        const h = stack.pop();
+        for (const k2 of outE[h]) {
+          if (!edgeOn(k2)) continue;
+          const e2 = G.edges[k2], c = e2[1], r2 = relName(e2[2]);
+          if (!visible.has(c) || seen.has(c) || (!ORIGIN.has(r2) && !PARALLEL.has(r2))) continue;
+          seen.add(c);
+          if (!shownSet.has(c)) { stack.push(c); continue; }
+          if (c !== a && !virtual.has(a + '>' + c)) virtual.set(a + '>' + c, { k: 'v' + a + '>' + c, a, b: c, rel: r2, x: null, via: true });
+        }
+      }
+    }
+  }
+  for (const [key, v] of virtual) if (!real.has(key)) edges.push(v);
+  return edges;
+}
+
+// groups of one word across conceptions: the word on top, the earlier forms under it
+function parallelGroups(nodes, edges) {
+  const up = new Map(nodes.map(i => [i, i]));
+  const find = x => { while (up.get(x) !== x) { up.set(x, up.get(up.get(x))); x = up.get(x); } return x; };
+  const sources = new Set();
+  if (parMode !== 'free') {
+    for (const e of edges) {
+      if (e.via || !PARALLEL.has(e.rel)) continue;
+      up.set(find(e.a), find(e.b));
+      sources.add(e.a);
+    }
+  }
+  const groups = new Map();
+  for (const i of nodes) {
+    const g = find(i);
+    if (!groups.has(g)) groups.set(g, []);
+    groups.get(g).push(i);
+  }
+  const groupOf = new Map(), stackIdx = new Map(), anchorOf = new Map();
+  for (const [g, members] of groups) {
+    // the word itself (not merged into another) first, then the conceptions from late to early
+    members.sort((x, y) => (sources.has(x) - sources.has(y)) || (eraOf(G.nodes[y].l) - eraOf(G.nodes[x].l))
+      || String(G.nodes[x].f).localeCompare(String(G.nodes[y].f)));
+    members.forEach((m, k) => { groupOf.set(m, g); stackIdx.set(m, k); anchorOf.set(m, members[0]); });
+  }
+  return { groupOf, stackIdx, anchorOf };
+}
+
+// the stage of a node, its leftmost column: root, primitive form, ancient language (AQ., AT., OS.,
+// ON.), language (with neo); a word straight from a root still stands right of the primitive forms
+const ANCIENT = new Set(['aq', 'maq', 'at', 'os', 'on']);
+const PRIMITIVE_L = new Set(['p', 'mp', 'ep', 'np']);
+function stageOf(i) {
+  const n = G.nodes[i];
+  return n.k === 'root' ? 0 : PRIMITIVE_L.has(n.l) ? 1 : ANCIENT.has(n.l) ? 2 : 3;
+}
+function ranks(nodes, edges, groupOf) {
+  const rank = new Map();
+  for (const i of nodes) {
+    const g = groupOf.get(i);
+    rank.set(g, Math.max(rank.get(g) || 0, stageOf(i)));
+  }
+  // the links that order the columns: of origin only ('instead' -- a deprecated word and what Eldamo
+  // suggests in its place -- says nothing of what comes first), between different groups, and with
+  // the cycles cut (S. lhaw ~ N. lhewig; through 'instead' many more): a link back to a group still
+  // on the way of a depth-first walk is left out. Before, a cycle pushed its nodes 40 columns away
+  const out = new Map();
+  for (const e of edges) {
+    if (e.rel === 'instead' || e.rel === 'cognates') continue;
+    const ga = groupOf.get(e.a), gb = groupOf.get(e.b);
+    if (ga === gb) continue;
+    if (!out.has(ga)) out.set(ga, new Set());
+    out.get(ga).add(gb);
+  }
+  const state = new Map(), order = [];          // 1 on the way, 2 done; order: finished last first
+  const keep = new Map();
+  for (const start of rank.keys()) {
+    if (state.get(start)) continue;
+    const stack = [[start, [...(out.get(start) || [])], 0]];
+    state.set(start, 1);
+    while (stack.length) {
+      const top = stack[stack.length - 1];
+      const [g, next] = top;
+      if (top[2] < next.length) {
+        const h = next[top[2]++];
+        if (state.get(h) === 1) continue;       // back to the way: a cycle, cut here
+        if (!keep.has(g)) keep.set(g, []);
+        keep.get(g).push(h);
+        if (!state.get(h)) { state.set(h, 1); stack.push([h, [...(out.get(h) || [])], 0]); }
+      } else {
+        state.set(g, 2);
+        order.push(g);
+        stack.pop();
+      }
+    }
+  }
+  // in topological order (the reverse of finishing): each group right of all its sources
+  for (let k = order.length - 1; k >= 0; k--) {
+    const g = order[k];
+    for (const h of keep.get(g) || []) if (rank.get(g) + 1 > rank.get(h)) rank.set(h, rank.get(g) + 1);
+  }
+  return rank;
+}
+
+// nodes with their labels do not overlap: each is a box (the label's width, the node and the label
+// above it); an overlap is undone along its smaller side, mostly vertically since the columns hold x
+function boxCollide() {
+  let nodes = [];
+  // swept along x: a node meets only those near enough to overlap it (the widest label bounds the
+  // reach), not every other node -- with a thousand and more on the graph that was most of a tick
+  function force() {
+    const n = nodes.length;
+    const order = nodes.slice().sort((p, q) => p.x - q.x);
+    let wMax = 0;
+    for (const d of nodes) if (d.w > wMax) wMax = d.w;
+    for (let i = 0; i < n; i++) {
+      const a = order[i];
+      for (let j = i + 1; j < n; j++) {
+        const b = order[j];
+        if (b.x - a.x >= (a.w + wMax) / 2 + 10) break;
+        const ox = (a.w + b.w) / 2 + 10 - Math.abs(a.x - b.x);
+        if (ox <= 0) continue;
+        const oy = BOX_H - Math.abs(a.y - b.y);
+        if (oy <= 0) continue;
+        const wa = a.fx != null ? 0 : 1, wb = b.fx != null ? 0 : 1;
+        if (!wa && !wb) continue;
+        const sa = wa / (wa + wb), sb = wb / (wa + wb);
+        if (oy < ox * 1.5) {
+          const dir = a.y < b.y || (a.y === b.y && i < j) ? -1 : 1;
+          a.y += dir * oy * sa * 0.5; b.y -= dir * oy * sb * 0.5;
+        } else {
+          const dir = a.x < b.x ? -1 : 1;
+          a.x += dir * ox * sa * 0.5; b.x -= dir * ox * sb * 0.5;
+        }
+      }
+    }
+  }
+  force.initialize = ns => { nodes = ns; };
+  return force;
+}
+
+// the band of a node: neo (words and roots of Neo-Eldarin: made by its authors, not Tolkien's), late,
+// middle, early conception
+const bandOf = i => 3 - eraOf(G.nodes[i].l);
+let currentLinks = [];
+// a node with what hangs on it alone: shown nodes all of whose shown parents are in the set
+function dependents(d) {
+  const parents = new Map();
+  for (const l of currentLinks) {
+    if (!parents.has(l.target)) parents.set(l.target, []);
+    parents.get(l.target).push(l.source);
+  }
+  const set = new Set([d]);
+  for (let changed = true; changed;) {
+    changed = false;
+    for (const [node, ps] of parents) {
+      if (set.has(node) || node.i === focusNode) continue;
+      if (ps.every(p => set.has(p))) { set.add(node); changed = true; }
+    }
+  }
+  return [...set];
+}
+// the end of a link on the node's edge, from the side it comes; a ring (selected, focus) is wider
+const radius = d => (d.i === selected || d.i === focusNode ? 15 : 9);
+let settled = true;             // the graph is at rest: the links get their smoothed routes
+function linkPath(d) {
+  const s = d.source, tg = d.target;
+  const dx = tg.x - s.x;
+  if (d.stacked || Math.abs(dx) < 40) {      // under each other: a bracket on the left
+    const sx = s.x - 8, tx = tg.x - radius(tg), ox = Math.min(s.x, tg.x) - 34;
+    return `M${sx},${s.y}C${ox},${s.y} ${ox},${tg.y} ${tx},${tg.y}`;
+  }
+  const dir = dx > 0 ? 1 : -1;
+  const sx = s.x + dir * 8, tx = tg.x - dir * radius(tg);
+  // the plain S-curve, as long as it misses every node on its way. Where it would cross a stretch of
+  // nodes (with their labels), it is made to pass that stretch at the free height nearest its course:
+  // first through one point in the middle of the stretch, so it keeps its slope; if that still clips a
+  // box, level across the stretch. At its own ends (the column of the source or of the target) the link
+  // eases in the gap around the end's height instead of turning sharply just before the node. Between
+  // the points the curve is monotone, so it never swings beyond them
+  // while the nodes move (laying out, dragging) the plain curve is enough: the route is found when they
+  // stop. Finding it on every frame was most of the cost of a layout
+  if (!settled) { const mx = (sx + tx) / 2; return `M${sx},${s.y}C${mx},${s.y} ${mx},${tg.y} ${tx},${tg.y}`; }
+  const runs = runsBetween(s, tg, sx, tx, dir);
+  const plan = new Map();               // run -> {mode: 'point' | 'ease' | 'flat', y}
+  let curve = plainCurve(sx, s.y, tx, tg.y);
+  for (let round = 0; round < 10 && runs.length; round++) {
+    // the first stretch the curve still clips that can be passed more carefully
+    const run = runs.find(r => !(plan.get(r) && plan.get(r).mode === 'flat') && crosses(curve.pts, r));
+    if (!run) break;
+    const enter = dir > 0 ? Math.max(sx, run.l) : Math.min(sx, run.r);
+    const leave = dir > 0 ? Math.min(tx, run.r) : Math.max(tx, run.l);
+    const atEnd = leave === tx, atStart = enter === sx;
+    const p = plan.get(run);
+    if (!p) {
+      if (atEnd || atStart) {
+        // ease within the gap around the end's height, coming from where the curve stands
+        const endY = atEnd ? tg.y : s.y;
+        const [gt, gb] = gapAround(run.boxes, endY);
+        const from = yAt(curve.pts, atEnd ? enter : leave);
+        plan.set(run, { mode: 'ease', y: Math.max(gt + 2, Math.min(gb - 2, from)), enter, leave, atEnd });
+      } else {
+        const want = yAt(curve.pts, (enter + leave) / 2);
+        plan.set(run, { mode: 'point', y: freeY(run.boxes, want), enter, leave });
+      }
+    } else {
+      p.mode = 'flat';
+      if (p.atEnd !== undefined) p.y = p.atEnd ? tg.y : s.y;
+    }
+    curve = monotoneCurve(knotsOf(sx, s.y, tx, tg.y, runs, plan));
+  }
+  // (the smoothing is left for when the graph settles: while nodes move it would be redone every frame)
+  if (!plan.size || !settled) return curve.d;
+  // the planned curve is clear of the boxes but bends only between stretches, sharply where they stand
+  // close. The smoothest way along the same side of every box: the taut string through the corridor
+  // the boxes leave (it touches only the corners it must go round), drawn as a monotone curve through
+  // those corners; kept when it clears every box too
+  for (const m of [3, 6]) {
+    const smooth = corridorCurve(s, tg, sx, tx, dir, curve.pts, runs, m);
+    if (smooth && !runs.some(r => crosses(smooth.pts, r))) return smooth.d;
+  }
+  return curve.d;
+}
+// The taut string from (sx, s.y) to (tx, tg.y) between the boxes, each kept on the side of the guide
+// curve it is on, with a margin m; as a monotone curve through its corners. Null when there is no room
+function corridorCurve(s, tg, sx, tx, dir, guide, runs, m) {
+  const U = x => dir * x;                          // along the link
+  const u0 = U(sx), u1 = U(tx);
+  // only the boxes near the link's course: a box far above or below it bounds nothing the string
+  // reaches (a long link over full columns had the whole graph here). What it misses, the check of the
+  // result against every box catches
+  let gy0 = Math.min(s.y, tg.y), gy1 = Math.max(s.y, tg.y);
+  for (const [, y] of guide) { if (y < gy0) gy0 = y; if (y > gy1) gy1 = y; }
+  gy0 -= 4 * BOX_H; gy1 += 4 * BOX_H;
+  const bs = [];
+  for (const run of runs) for (const b of run.boxes) {
+    if (b.b < gy0 || b.t > gy1) continue;
+    const a = Math.max(u0, Math.min(U(b.l), U(b.r))), z = Math.min(u1, Math.max(U(b.l), U(b.r)));
+    if (z <= a) continue;
+    const gy = yAt(guide, dir * ((a + z) / 2));
+    bs.push({ a, z, above: (b.t + b.b) / 2 < gy, t: b.t - m, b: b.b + m });
+  }
+  const cuts = [...new Set(bs.flatMap(b => [b.a, b.z]).filter(u => u > u0 && u < u1))].sort((p, q) => p - q);
+  const edges = [u0, ...cuts, u1];
+  // per interval: [lowest y, highest y] allowed. A box covers the intervals from its left edge to its
+  // right one (found by halving): each box touches only those, not every interval of a long link
+  const band = Array.from({ length: edges.length - 1 }, () => [-Infinity, Infinity]);
+  const firstAtOrAfter = u => { let lo = 0, hi = edges.length - 1; while (lo < hi) { const m = (lo + hi) >> 1; if (edges[m] < u) lo = m + 1; else hi = m; } return lo; };
+  for (const b of bs) {
+    for (let k = Math.max(0, firstAtOrAfter(b.a) - 1); k + 1 < edges.length && edges[k] <= b.z; k++) {
+      const mid = (edges[k] + edges[k + 1]) / 2;
+      if (b.a > mid || b.z < mid) continue;
+      if (b.above) band[k][0] = Math.max(band[k][0], b.b); else band[k][1] = Math.min(band[k][1], b.t);
+    }
+  }
+  if (band.some(([lo, hi]) => lo > hi)) return null;
+  const portals = [];
+  for (let k = 1; k + 1 < edges.length; k++) {
+    const lo = Math.max(band[k - 1][0], band[k][0]), hi = Math.min(band[k - 1][1], band[k][1]);
+    if (lo > hi) return null;
+    if (lo === -Infinity && hi === Infinity) continue;
+    // which side of the cut the box that sets each bound stands on: 'L' (it ends here), 'R' (it begins)
+    const side = (v, l, r) => (v === l && v === r ? 'B' : v === l ? 'L' : 'R');
+    portals.push({ u: edges[k], lo, hi, sideLo: side(lo, band[k - 1][0], band[k][0]), sideHi: side(hi, band[k - 1][1], band[k][1]) });
+  }
+  if (s.y < band[0][0] || s.y > band[0][1] || tg.y < band[band.length - 1][0] || tg.y > band[band.length - 1][1]) return null;
+  portals.push({ u: u1, lo: tg.y, hi: tg.y });
+  // the funnel: from the apex, the tightest slopes to the upper and lower bounds; where they cross,
+  // the string bends at the corner that caused it
+  const path = [];
+  let ax = u0, ay = s.y, start = 0;
+  for (let guard = 0; guard < 200; guard++) {
+    let up = Infinity, low = -Infinity, upAt = -1, lowAt = -1, bent = false;
+    for (let k = start; k < portals.length; k++) {
+      const p = portals[k], dx = p.u - ax;
+      if (dx < 1e-6) continue;
+      const su = (p.hi - ay) / dx, sl = (p.lo - ay) / dx;
+      if (su < low) { const q = portals[lowAt]; path.push([q.u, q.lo, q.sideLo]); ax = q.u; ay = q.lo; start = lowAt + 1; bent = true; break; }
+      if (sl > up) { const q = portals[upAt]; path.push([q.u, q.hi, q.sideHi]); ax = q.u; ay = q.hi; start = upAt + 1; bent = true; break; }
+      if (su < up) { up = su; upAt = k; }
+      if (sl > low) { low = sl; lowAt = k; }
+    }
+    if (!bent) break;
+  }
+  // a corner is passed along the side of the box: the slope there is that of the string on the box's
+  // side (before the corner for a box that ends there, after it for one that begins), so the curve
+  // turns only once clear of the box
+  const ks = [[u0, s.y, 'E'], ...path.filter(([u]) => u > u0 + 0.5 && u < u1 - 0.5), [u1, tg.y, 'E']];
+  const sec = k => (ks[k + 1][1] - ks[k][1]) / (ks[k + 1][0] - ks[k][0]);
+  const slopes = ks.map(([, , side], k) => (side === 'L' ? sec(k - 1) : side === 'R' ? sec(k) : 0));
+  return hermiteCurve(ks.map(([u, y]) => [u, y]), slopes, dir);
+}
+// a curve through the knots (in the link's own direction u = dir * x) with the given slopes dy/du
+function hermiteCurve(knots, slopes, dir) {
+  let d = `M${dir * knots[0][0]},${knots[0][1]}`;
+  const pts = [[dir * knots[0][0], knots[0][1]]];
+  for (let k = 0; k + 1 < knots.length; k++) {
+    const [u0, y0] = knots[k], [u1, y1] = knots[k + 1], h = u1 - u0;
+    const c1 = [u0 + h / 3, y0 + slopes[k] * h / 3], c2 = [u1 - h / 3, y1 - slopes[k + 1] * h / 3];
+    d += `C${dir * c1[0]},${c1[1]} ${dir * c2[0]},${c2[1]} ${dir * u1},${y1}`;
+    for (let q = 1; q <= 10; q++) {
+      const t = q / 10, w = 1 - t;
+      pts.push([dir * (w * w * w * u0 + 3 * w * w * t * c1[0] + 3 * w * t * t * c2[0] + t * t * t * u1),
+        w * w * w * y0 + 3 * w * w * t * c1[1] + 3 * w * t * t * c2[1] + t * t * t * y1]);
+    }
+  }
+  return { d, pts };
+}
+// the knots of a planned link, in its direction
+function knotsOf(sx, sy, tx, ty, runs, plan) {
+  const knots = [[sx, sy]];
+  const put = (x, y) => {
+    const last = knots[knots.length - 1];
+    if (Math.abs(x - last[0]) > 0.5) knots.push([x, y]); else last[1] = y;
+  };
+  for (const run of runs) {
+    const p = plan.get(run);
+    if (!p) continue;
+    if (p.mode === 'point') put((p.enter + p.leave) / 2, p.y);
+    else if (p.mode === 'ease') { if (p.atEnd) put(p.enter, p.y); else { put(p.enter, sy); put(p.leave, p.y); } }
+    else { put(p.enter, p.y); put(p.leave, p.y); }
+  }
+  put(tx, ty);
+  return knots;
+}
+// the free gap (between the boxes of a stretch) that holds the height y
+function gapAround(bs, y) {
+  let top = -Infinity, bottom = Infinity;
+  for (const b of bs) {
+    if (b.b <= y && b.b > top) top = b.b;
+    if (b.t >= y && b.t < bottom) bottom = b.t;
+    if (b.t < y && b.b > y) return [y, y];          // y itself is covered: no room to ease
+  }
+  return [top, bottom];
+}
+// the S-curve of a link between two points: level at both ends
+function plainCurve(x0, y0, x1, y1) {
+  const mx = (x0 + x1) / 2, pts = [];
+  for (let k = 0; k <= 24; k++) {
+    const t = k / 24, u = 1 - t;
+    pts.push([u * u * u * x0 + 3 * u * u * t * mx + 3 * u * t * t * mx + t * t * t * x1,
+      u * u * u * y0 + 3 * u * u * t * y0 + 3 * u * t * t * y1 + t * t * t * y1]);
+  }
+  return { d: `M${x0},${y0}C${mx},${y0} ${mx},${y1} ${x1},${y1}`, pts };
+}
+// a smooth curve through the knots, level at the first and the last, never overshooting (the
+// monotone cubic of d3.curveMonotoneX); x runs either way
+function monotoneCurve(knots) {
+  const n = knots.length;
+  const h = [], sl = [];
+  for (let k = 0; k + 1 < n; k++) {
+    h.push(knots[k + 1][0] - knots[k][0]);
+    sl.push((knots[k + 1][1] - knots[k][1]) / h[k]);
+  }
+  const m = new Array(n).fill(0);
+  for (let k = 1; k + 1 < n; k++) {
+    const s0 = sl[k - 1], s1 = sl[k], p = (s0 * h[k] + s1 * h[k - 1]) / (h[k - 1] + h[k]);
+    m[k] = (Math.sign(s0) + Math.sign(s1)) * Math.min(Math.abs(s0), Math.abs(s1), 0.5 * Math.abs(p)) || 0;
+  }
+  let d = `M${knots[0][0]},${knots[0][1]}`;
+  const pts = [knots[0].slice()];
+  for (let k = 0; k + 1 < n; k++) {
+    const [x0, y0] = knots[k], [x1, y1] = knots[k + 1], hh = h[k];
+    const c1 = [x0 + hh / 3, y0 + m[k] * hh / 3], c2 = [x1 - hh / 3, y1 - m[k + 1] * hh / 3];
+    d += y0 === y1 && m[k] === 0 && m[k + 1] === 0 ? `L${x1},${y1}` : `C${c1[0]},${c1[1]} ${c2[0]},${c2[1]} ${x1},${y1}`;
+    for (let q = 1; q <= 10; q++) {
+      const t = q / 10, u = 1 - t;
+      pts.push([u * u * u * x0 + 3 * u * u * t * c1[0] + 3 * u * t * t * c2[0] + t * t * t * x1,
+        u * u * u * y0 + 3 * u * u * t * c1[1] + 3 * u * t * t * c2[1] + t * t * t * y1]);
+    }
+  }
+  return { d, pts };
+}
+// The sampled curves run one way in x (a link never turns back), so a point is found by halving:
+// the index of the last sample at or before x along the curve's direction
+function seg(pts, x) {
+  const up = pts[pts.length - 1][0] >= pts[0][0];
+  let lo = 0, hi = pts.length - 1;
+  while (hi - lo > 1) {
+    const mid = (lo + hi) >> 1;
+    if ((pts[mid][0] <= x) === up) lo = mid; else hi = mid;
+  }
+  return lo;
+}
+// the height of a sampled curve at x
+function yAt(pts, x) {
+  const first = pts[0], last = pts[pts.length - 1];
+  const a = Math.min(first[0], last[0]), b = Math.max(first[0], last[0]);
+  // beyond the curve: the height of its nearer end
+  if (x < a || x > b) return Math.abs(x - first[0]) < Math.abs(x - last[0]) ? first[1] : last[1];
+  const k = seg(pts, x), [x0, y0] = pts[k], [x1, y1] = pts[Math.min(k + 1, pts.length - 1)];
+  return x1 === x0 ? y0 : y0 + (y1 - y0) * (x - x0) / (x1 - x0);
+}
+// does the sampled curve pass through a box of the stretch
+function crosses(pts, run) {
+  const xa = Math.min(pts[0][0], pts[pts.length - 1][0]), xb = Math.max(pts[0][0], pts[pts.length - 1][0]);
+  let ya = Infinity, yb = -Infinity;               // a box wholly above or below the curve: missed
+  for (const [, y] of pts) { if (y < ya) ya = y; if (y > yb) yb = y; }
+  for (const b of run.boxes) {
+    if (b.b <= ya || b.t >= yb) continue;
+    const l = Math.max(b.l, xa), r = Math.min(b.r, xb);    // only where the curve is
+    if (r <= l) continue;
+    let lo = Math.min(yAt(pts, l), yAt(pts, r)), hi = Math.max(yAt(pts, l), yAt(pts, r));
+    let k0 = seg(pts, l), k1 = seg(pts, r);
+    if (k0 > k1) [k0, k1] = [k1, k0];
+    for (let k = k0; k <= k1 + 1 && k < pts.length; k++) {
+      const [x, y] = pts[k];
+      if (x > l && x < r) { if (y < lo) lo = y; if (y > hi) hi = y; }
+    }
+    if (lo < b.b && hi > b.t) return true;
+  }
+  return false;
+}
+// The boxes of the nodes (with their labels above), sorted by their left edge; rebuilt on every frame
+let boxes = [];
+function buildBoxes(data) {
+  boxes = data.map(d => ({ d, l: d.x - Math.max(d.w / 2, 10) - 4, r: d.x + Math.max(d.w / 2, 10) + 4, t: d.y - 23, b: d.y + radius(d) + 1 }))
+    .sort((p, q) => p.l - q.l);
+}
+// the stretches of boxes (overlapping in x) between the two ends of a link, in its direction
+function runsBetween(s, tg, sx, tx, dir) {
+  const lo = Math.min(sx, tx), hi = Math.max(sx, tx);
+  const runs = [];
+  for (const bx of boxes) {
+    if (bx.l >= hi) break;
+    if (bx.r <= lo) continue;
+    // the two ends: only their labels are in the way (the link runs from and into the circles)
+    const own = bx.d === s || bx.d === tg ? { d: bx.d, l: bx.l, r: bx.r, t: bx.t, b: bx.d.y - 6 } : bx;
+    const last = runs[runs.length - 1];
+    if (last && own.l <= last.r + 6) { last.r = Math.max(last.r, own.r); last.boxes.push(own); }
+    else runs.push({ l: own.l, r: own.r, boxes: [own] });
+  }
+  if (dir < 0) runs.reverse();
+  return runs;
+}
+// the height nearest y that no box of the stretch covers: y itself when free, else the middle of
+// the nearest gap between boxes (or a little above the top one, below the bottom one)
+function freeY(bs, y) {
+  const iv = bs.map(b => [b.t, b.b]).sort((p, q) => p[0] - q[0]);
+  const merged = [];
+  for (const [t, b] of iv) {
+    const last = merged[merged.length - 1];
+    if (last && t <= last[1]) last[1] = Math.max(last[1], b); else merged.push([t, b]);
+  }
+  if (!merged.some(([t, b]) => y > t - 1 && y < b + 1)) return y;
+  let best = merged[0][0] - 5;
+  const near = v => { if (Math.abs(v - y) < Math.abs(best - y)) best = v; };
+  for (let k = 0; k + 1 < merged.length; k++) near((merged[k][1] + merged[k + 1][0]) / 2);
+  near(merged[merged.length - 1][1] + 5);
+  return best;
+}
+// one click selects; two expand or collapse what the node expanded; three fold its derivatives.
+// The second click waits a moment to see whether a third comes
+// With Shift a double click opens the derivatives only, with Ctrl (Alt, ⌥) the sources only
+let clickTimer = null;
+function clicks(i, n, ev) {
+  if (n < 2) return;
+  const dir = ev && ev.shiftKey ? 'out' : ev && (ev.ctrlKey || ev.altKey || ev.metaKey) ? 'in' : 'all';
+  clearTimeout(clickTimer);
+  clickTimer = setTimeout(() => {
+    selected = i;
+    if (n >= 3) collapseDerivatives(i); else if (dir === 'all') toggle(i); else toggleSide(i, dir);
+    select(i);
+  }, 280);
+}
+// fold everything that comes from a node, except the focus and its tree of origin
+function collapseDerivatives(i) {
+  const keep = new Set(upstream(focusNode, 300));
+  const gone = new Set(), stack = [i];
+  while (stack.length) {
+    const x = stack.pop();
+    for (const k of outE[x]) {
+      const b = G.edges[k][1];
+      if (!visible.has(b) || gone.has(b) || keep.has(b) || b === i) continue;
+      gone.add(b);
+      stack.push(b);
+    }
+  }
+  for (const x of gone) { expanded.delete(x); drop(x); }
+  expanded.delete(i);
+  if (!visible.has(selected)) selected = i;
+  render(false);
+}
+function hasFoldable(i) {
+  const keep = new Set(upstream(focusNode, 300));
+  return outE[i].some(k => { const b = G.edges[k][1]; return visible.has(b) && !keep.has(b); });
+}
+
+// ---- the layout: columns by rank, the conceptions in bands, the nodes of a column in order
+const ROW = BOX_H + 6;
+const BRANCH_RANK = { quenya: 0, sindarin: 1, elvish: 2, primitive: 3, other: 4 };
+let bandRange = new Map();          // band -> [lowest, highest] centre of a node in it
+const clampY = (d, y) => {
+  const r = bandRange.get(d.band);
+  return r ? Math.max(r[0], Math.min(r[1], y)) : y;
+};
+function bandClamp() {
+  let nodes = [];
+  function force() { for (const d of nodes) if (d.fx == null) d.y = clampY(d, d.y); }
+  force.initialize = ns => { nodes = ns; };
+  return force;
+}
+// places every node (tx, ty) and returns the bands. A column is sorted by branch (Quenya on top,
+// then Sindarin, other Elvish), then by period, then by where its parents stand; it is centred on its
+// parents, and a column without them on its children. A band is as high as its fullest column, so
+// bands never overlap
+function layout(data, links) {
+  const parents = new Map(), children = new Map();
+  for (const l of links) {
+    if (l.inGroup) continue;              // the forms of one word across conceptions do not pull
+    if (!parents.has(l.target)) parents.set(l.target, []);
+    parents.get(l.target).push(l.source);
+    if (!children.has(l.source)) children.set(l.source, []);
+    children.get(l.source).push(l.target);
+  }
+  const unit = parMode === 'stack' ? STACK : ROW;
+  for (const d of data) { d.size = 1; d.band = parMode === 'bands' ? bandOf(d.i) : 0; d.ty = null; }
+  if (parMode === 'stack') for (const d of data) if (d.anchor) d.anchor.size = Math.max(d.anchor.size, d.stack + 1);
+  const slot = d => (parMode === 'stack' ? d.size * STACK : ROW);
+  const cols = new Map();
+  for (const d of data) {
+    if (d.anchor) continue;               // a stacked form rides on its word
+    const key = d.band + ':' + d.rank;
+    if (!cols.has(key)) cols.set(key, []);
+    cols.get(key).push(d);
+  }
+  const span = col => col.reduce((sum, d) => sum + slot(d), 0) - unit;
+  const most = new Map();
+  for (const [key, col] of cols) {
+    const b = +key.split(':')[0];
+    most.set(b, Math.max(most.get(b) || 0, span(col)));
+  }
+  const bands = [];
+  bandRange = new Map();
+  let y = 0;
+  for (const b of [0, 1, 2, 3]) {
+    if (!most.has(b)) continue;
+    const y0 = y, y1 = y + 30 + most.get(b) + 14;
+    bands.push({ b, y0, y1 });
+    bandRange.set(b, [y0 + 30, y1 - 14]);
+    y = y1 + 46;
+  }
+  const keys = [...cols.keys()].sort((a, c) => {
+    const [ba, ra] = a.split(':').map(Number), [bc, rc] = c.split(':').map(Number);
+    return ra - rc || ba - bc;
+  });
+  const mean = xs => (xs.length ? xs.reduce((sum, v) => sum + v, 0) / xs.length : null);
+  const bary = (d, nb) => mean((nb.get(d) || []).filter(x => x.ty != null).map(x => x.ty));
+  const branchKey = d => BRANCH_RANK[branchOf(G.nodes[d.i].l)];
+  const eraKey = d => -eraOf(G.nodes[d.i].l);
+  const nameKey = d => String(shown(d.i));
+  const baryKey = d => (d._b == null ? 1e9 : d._b);
+  const ORDERS = {
+    // derivatives of one source together; among them Quenya above Sindarin. Sources a few pixels
+    // apart count as one place (a word from two neighbouring forms)
+    source: (p, q) => (Math.round(baryKey(p) / 4) - Math.round(baryKey(q) / 4)) || (branchKey(p) - branchKey(q))
+      || (eraKey(p) - eraKey(q)) || (baryKey(p) - baryKey(q)) || nameKey(p).localeCompare(nameKey(q)),
+    branch: (p, q) => (branchKey(p) - branchKey(q)) || (eraKey(p) - eraKey(q)) || (baryKey(p) - baryKey(q))
+      || nameKey(p).localeCompare(nameKey(q)),
+    alpha: (p, q) => nameKey(p).localeCompare(nameKey(q)) || (branchKey(p) - branchKey(q)),
+  };
+  // a column in its order, each node as near its sources (or derivatives) as the others let it:
+  // down from the top without overlaps, then back up so that the column fits its band
+  function place(key, sortIt, nb) {
+    const col = cols.get(key), b = +key.split(':')[0];
+    for (const d of col) d._b = bary(d, nb);
+    if (sortIt) col.sort(ORDERS[colOrder]);
+    if (!col.some(d => d._b != null) && col[0].ty != null) return;     // nothing to align to: stays
+    const [lo, hi] = bandRange.get(b);
+    const n = col.length, ys = new Array(n);
+    // where a node without neighbours wants to be: right under the previous one
+    let prev = -Infinity;
+    for (let k = 0; k < n; k++) {
+      const d = col[k];
+      const want = d._b != null ? d._b : (k ? prev : (lo + hi) / 2 - span(col) / 2);
+      ys[k] = Math.max(want, k ? ys[k - 1] + slot(col[k - 1]) : lo, lo);
+      prev = ys[k] + slot(d);
+    }
+    let bottom = hi;
+    for (let k = n - 1; k >= 0; k--) {
+      ys[k] = Math.min(ys[k], bottom - (slot(col[k]) - unit));
+      bottom = ys[k] - unit;
+    }
+    for (let k = 0; k < n; k++) { col[k].ty = ys[k]; col[k].tx = col[k].rank * COL; }
+  }
+  for (const k of keys) place(k, true, parents);                 // left to right, by parents
+  for (const k of [...keys].reverse()) place(k, false, children); // right to left, by children
+  for (const k of keys) place(k, colOrder !== 'branch' && colOrder !== 'alpha', parents);  // by parents again
+  // room to bend: a gap between two columns grows with the steepest drop a link makes across it (a
+  // link over several gaps shares its drop among them), so that links keep a gentle slope instead of
+  // diving between narrow columns and turning sharply at their ends
+  const ranksUsed = data.map(d => d.rank);
+  const top = Math.max(0, ...ranksUsed);
+  const need = new Array(top + 1).fill(0);
+  for (const l of links) {
+    const a = l.source, z = l.target;
+    if (!a || !z || l.inGroup || a.anchor || z.anchor || a.rank === z.rank) continue;
+    const r0 = Math.min(a.rank, z.rank), r1 = Math.max(a.rank, z.rank);
+    const drop = Math.abs(z.ty - a.ty) / (r1 - r0);
+    for (let r = r0; r < r1; r++) need[r] = Math.max(need[r], drop);
+  }
+  const colX = [0];
+  for (let r = 0; r < top; r++) colX.push(colX[r] + COL + Math.min(COL * 1.3, Math.max(0, need[r] * 0.6 - COL * 0.45)));
+  for (const d of data) if (!d.anchor) d.tx = colX[d.rank];
+  for (const d of data) {
+    if (!d.anchor) continue;
+    d.tx = d.anchor.tx; d.ty = d.anchor.ty + d.stack * STACK; d.band = d.anchor.band;
+  }
+  return bands;
+}
+
+let fitPending = false;
+let lastCounts = null;
+let unknownMsg = '';            // an address with a page not on the graph, until another node is focused
+function showNote() {
+  if (unknownMsg && mode === 'graph') { $('note').textContent = unknownMsg; return; }
+  if (mode === 'roots') $('note').textContent = t('ov.note', { r: ovCounts.roots, p: ovCounts.proto, w: ovCounts.words });
+  else if (lastCounts) $('note').textContent = t('note.onScreen', { nodes: lastCounts[0], edges: lastCounts[1] });
+}
+function render(refit) {
+  const shownSet = new Set([...visible].filter(i => i === focusNode || pathKeep.has(i) || passes(i)
+    || (cognateKeep.has(i) && langOn[G.nodes[i].l] !== false)));
+  shownNodes = shownSet;
+  const nodes = [...shownSet];
+  const edges = shownLinks(shownSet);
+  const { groupOf, stackIdx, anchorOf } = parallelGroups(nodes, edges);
+  const rank = ranks(nodes, edges, groupOf);
+  COL = svg.node().getBoundingClientRect().width < 700 ? 160 : 230;
+  const data = nodes.map(i => {
+    let p = pos.get(i);
+    const fresh = !p;
+    if (!p) { p = {}; pos.set(i, p); }
+    p.i = i; p.rank = rank.get(groupOf.get(i)); p.stack = stackIdx.get(i); p.fresh = fresh;
+    return p;
+  });
+  const byI = new Map(data.map(d => [d.i, d]));
+  for (const d of data) {
+    const a = anchorOf.get(d.i);
+    d.anchor = parMode === 'stack' && a !== d.i ? byI.get(a) : null;
+  }
+  const links = edges.map(e => ({
+    ...e, source: byI.get(e.a), target: byI.get(e.b),
+    inGroup: !e.via && groupOf.get(e.a) === groupOf.get(e.b),
+    stacked: parMode === 'stack' && !e.via && PARALLEL.has(e.rel) && groupOf.get(e.a) === groupOf.get(e.b),
+  }));
+  currentLinks = links;
+  const bands = layout(data, links);
+  for (const d of data) if (d.fresh) { d.x = d.tx; d.y = d.ty; d.fresh = false; }
+  gData = data; gLinks = links;
+  if (selEdge) selEdge = links.find(l => l.k === selEdge.k) || null;
+  for (const d of data) labelOf(d);
+
+  // the places are computed (layout); the simulation only brings the nodes to them, keeps boxes
+  // apart and every node inside its band. No springs: a node moved by hand stays, the rest do not move
+  if (sim) sim.stop();
+  sim = d3.forceSimulation(data)
+    .force('x', d3.forceX(d => d.tx).strength(0.5))
+    .force('y', d3.forceY(d => d.ty).strength(0.5))
+    .force('boxes', boxCollide())
+    .force('bands', bandClamp())
+    .velocityDecay(0.45)
+    .alphaMin(0.01)          // the places are computed: the nodes are there long before the default end
+    .on('tick', draw);
+  fitPending = refit;
+  settled = false;
+  if (reduced) { sim.stop(); for (let k = 0; k < 300; k++) sim.tick(); settled = true; draw(); fitView(false); fitPending = false; }
+  else sim.alpha(refit ? 1 : 0.4).restart().on('end', () => {
+    settled = true;
+    draw();
+    if (fitPending) { fitView(true); fitPending = false; }
+  });
+  if (refit && !reduced) setTimeout(() => { if (fitPending) { fitView(true); fitPending = false; } }, 1100);
+
+  gBands = parMode === 'bands' ? bands : [];
+  function draw() {
+    buildBoxes(data);
+    for (const d of links) d._p = linkPath(d);
+    grRequestDraw();
+  }
+  lastCounts = [data.length, links.length];
+  showNote();
+}
+
+// ---- the drawing
+// What is on the graph: the nodes (with x, y and their labels), the links (with their routes, _p, as svg
+// path data), the bands. The canvas and the svg export draw the same things the same way
+let gData = [], gLinks = [], gBands = [];
+let grFrame = 0;
+function grRequestDraw() {
+  if (!grFrame) grFrame = requestAnimationFrame(() => { grFrame = 0; grDraw(); });
+}
+function grDraw() {
+  if (mode !== 'graph') return;
+  const w = grCanvas.clientWidth, h = grCanvas.clientHeight, dpr = window.devicePixelRatio || 1;
+  if (grCanvas.width !== Math.round(w * dpr) || grCanvas.height !== Math.round(h * dpr)) {
+    grCanvas.width = Math.round(w * dpr); grCanvas.height = Math.round(h * dpr);
+  }
+  const ctx = grCanvas.getContext('2d');
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, grCanvas.width, grCanvas.height);
+  paintGraph(ctx, d3.zoomTransform(svg.node()), dpr, w, h);
+}
+
+// The label over a node, as runs of text: "+N" (sources not shown), ⚠, the language marker(s) in their
+// colours, the form, "+N" (derivatives not shown). White space as svg text had it: a run is one space,
+// none at the ends. Measured once (and again when the fonts arrive); d.w is the width of the box
+const measureCtx = document.createElement('canvas').getContext('2d');
+const fontOf = r => `${r.style} ${r.weight} ${r.size}px ${r.family}`;
+function labelOf(d) {
+  const n = G.nodes[d.i], isR = n.k === 'root', al = altLang(n);
+  const hin = hiddenIn(d.i), hout = hiddenOut(d.i);
+  const ui = (t, color) => ({ t, color, style: 'normal', weight: 400, size: 10.5, family: css('--f-ui') });
+  const mk = (t, color) => ({ t, color, style: 'normal', weight: 400, size: 11, family: css('--f-form') });
+  const raw = [];
+  if (hin) raw.push(ui('+' + hin + '  ', css('--accent')));
+  if (warnMark(d.i)) raw.push(ui('⚠ ', css('--warn')));
+  raw.push(mk(codeMarker(n.l, isR), langColor(n.l, isR)));
+  if (al) raw.push(mk('[' + codeMarker(al, isR) + ']', langColor(al, isR)));
+  raw.push({ t: (isR ? '' : ' ') + shown(d.i), color: css('--ink'), style: isR ? 'normal' : 'italic', weight: isR ? 600 : 500, size: 12.5, family: css('--f-form') });
+  if (hout) raw.push(ui('  +' + hout, css('--accent')));
+  const runs = [];
+  let space = true;                     // at the start a space is dropped
+  for (const r of raw) {
+    r.t = r.t.replace(/\s+/g, ' ');
+    if (space && r.t.startsWith(' ')) r.t = r.t.slice(1);
+    if (!r.t) continue;
+    space = r.t.endsWith(' ');
+    runs.push(r);
+  }
+  if (space && runs.length) runs[runs.length - 1].t = runs[runs.length - 1].t.trimEnd();
+  let w = 0;
+  for (const r of runs) { measureCtx.font = fontOf(r); r.dx = w; w += measureCtx.measureText(r.t).width; }
+  d.runs = runs; d.lw = w; d.w = Math.max(20, w);
+}
+// the fonts come from the web: once they are in, the labels are measured again and the boxes follow
+if (document.fonts) document.fonts.addEventListener('loadingdone', () => {
+  if (!gData.length) return;
+  for (const d of gData) labelOf(d);
+  if (sim && mode === 'graph') { settled = false; sim.alpha(0.3).restart(); } else grRequestDraw();
+});
+
+// how a link and a node look (as the stylesheet had it): a picked link and its two nodes stand out and
+// the rest fade; a path shown fades all that is not on it
+const dashOf = s => (s ? s.split(/[ ,]+/).map(Number) : []);
+function edgeLook(d) {
+  const x = d.x || {};
+  const sel = !!selEdge && selEdge.k === d.k, on = !!pathShown && pathShown.edges.has(d.k);
+  // (1.5 for every relation: in the svg the stylesheet's width overrode the 2 meant for elements)
+  let width = 1.5, dash = d.via ? '1 4' : DASH[d.rel], op = 1;
+  if (d.via) op = 0.7;
+  if (x.nm) op = 0.45;                                    // the reference does not match
+  if (x.sc) { dash = '2 4'; width = 1.1; op = 0.7; }       // a root straight to a word (shortcut)
+  if (x.st) { dash = '7 3 1 3'; op = 0.55; }               // only by a reference Tolkien struck out
+  if (pathShown && !on) op = 0.1; else if (selEdge && !sel) op = 0.12;
+  if (sel) { width = 3.2; op = 1; }
+  if (on) { width = 3; op = 1; if (pathShown.cross.has(d.k)) dash = '9 4'; }
+  return { color: css('--e-' + d.rel), width, dash, op, arrow: d.rel !== 'cognates' };   // cognates: no direction
+}
+function nodeLook(d) {
+  const n = G.nodes[d.i];
+  const dep = !tolkien() && n.x === 'd', oth = !tolkien() && n.x === 'o', nam = n.x === 'n';
+  let op = dep || oth ? 0.55 : nam ? 0.7 : 1;
+  if (pathShown && !pathShown.nodes.has(d.i)) op = 0.3;
+  else if (selEdge && d.i !== selEdge.a && d.i !== selEdge.b) op = 0.28;
+  return {
+    op, fill: shapeFill(d.i), stroke: nodeColor(d.i), width: d.fx != null ? 2.6 : 1.6,     // moved by hand: bolder
+    dash: oth ? '2 2' : nam ? '4 2' : n.k === 'root' && !n.rec ? '2 2' : null,
+    ring: d.i === selected ? css('--focus') : d.i === focusNode ? css('--accent') : null,
+  };
+}
+const RING_R = Math.sqrt(520 / Math.PI);
+const shapeCache = new Map();
+function shapePath2D(i) {
+  const d = shapePath(i);
+  if (!shapeCache.has(d)) shapeCache.set(d, new Path2D(d));
+  return shapeCache.get(d);
+}
+// a link's route as a canvas path, its bounds and the direction it ends in (for the arrowhead): kept
+// until the route changes
+function edgeGeom(d) {
+  if (!d._p) return null;
+  if (d._g && d._g.p === d._p) return d._g;
+  const v = d._p.match(/-?\d*\.?\d+(?:e[-+]?\d+)?/gi).map(Number);
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (let k = 0; k + 1 < v.length; k += 2) {
+    if (v[k] < x0) x0 = v[k]; if (v[k] > x1) x1 = v[k];
+    if (v[k + 1] < y0) y0 = v[k + 1]; if (v[k + 1] > y1) y1 = v[k + 1];
+  }
+  const n = v.length, ex = v[n - 2], ey = v[n - 1];
+  d._g = { p: d._p, path: new Path2D(d._p), x0, x1, y0, y1, ex, ey, ang: Math.atan2(ey - v[n - 3], ex - v[n - 4]) };
+  return d._g;
+}
+// the arrowhead: the svg marker it was (8 x 7 units drawn at 10.5 px, its tip on the end of the link)
+const AH = 10.5 / 8;
+function arrowPoints(g) {
+  const c = Math.cos(g.ang), s = Math.sin(g.ang);
+  const at = (u, v) => [g.ex + (u * c - v * s) * AH, g.ey + (u * s + v * c) * AH];
+  return [at(-8, -3.5), [g.ex, g.ey], at(-8, 3.5)];
+}
+// the box a node takes with its label; the bands' extent over the nodes
+const LABEL_Y = -11;
+function bandSpan() {
+  let x0 = Infinity, x1 = -Infinity;
+  for (const d of gData) { if (d.x - d.w / 2 < x0) x0 = d.x - d.w / 2; if (d.x + d.w / 2 > x1) x1 = d.x + d.w / 2; }
+  return [x0 - 40, x1 + 40];
+}
+
+// The graph on a canvas at the transform tr (graph units to css pixels) and pixel ratio dpr. w, h: the
+// css size of what is seen, to skip what is off it and to leave out labels too small to read (a zoom
+// far out of a big view); without them (export) everything is drawn
+function paintGraph(ctx, tr, dpr, w, h) {
+  const k = tr.k, all = w == null;
+  const vx0 = all ? -Infinity : -tr.x / k, vy0 = all ? -Infinity : -tr.y / k;
+  const vx1 = all ? Infinity : (w - tr.x) / k, vy1 = all ? Infinity : (h - tr.y) / k;
+  const seen = (x0, y0, x1, y1) => x1 >= vx0 && x0 <= vx1 && y1 >= vy0 && y0 <= vy1;
+  // a dash shorter than a pixel or two cannot be seen, yet costs a canvas thousands of pieces per line
+  // (a big view zoomed out): then the line is drawn whole, fainter, as the dashes would look together
+  const dashes = all || k >= 0.5;
+  const dash = s => (dashes ? dashOf(s) : []), dashFade = s => (s && !dashes ? 0.6 : 1);
+  ctx.setTransform(dpr * k, 0, 0, dpr * k, dpr * tr.x, dpr * tr.y);
+  ctx.lineCap = 'butt'; ctx.lineJoin = 'miter';
+  // the bands behind
+  if (gBands.length && gData.length) {
+    const [x0, x1] = bandSpan();
+    ctx.font = `600 11px ${css('--f-ui')}`;
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '0.66px';
+    for (const b of gBands) {
+      ctx.globalAlpha = 0.22; ctx.fillStyle = css('--line');
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x0, b.y0, x1 - x0, b.y1 - b.y0, 8); else ctx.rect(x0, b.y0, x1 - x0, b.y1 - b.y0);
+      ctx.fill();
+      ctx.globalAlpha = 1; ctx.fillStyle = css('--muted'); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.fillText(t('band.' + b.b).toLocaleUpperCase(uiLang), x0 + 4, b.y0 - 8);
+    }
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+  }
+  // the links
+  for (const d of gLinks) {
+    const g = edgeGeom(d);
+    if (!g || !seen(g.x0 - 8, g.y0 - 8, g.x1 + 8, g.y1 + 8)) continue;
+    const L = edgeLook(d);
+    ctx.globalAlpha = L.op * dashFade(L.dash);
+    ctx.strokeStyle = L.color; ctx.lineWidth = L.width;
+    ctx.setLineDash(dash(L.dash));
+    ctx.stroke(g.path);
+    ctx.globalAlpha = L.op;
+    if (L.arrow) {
+      const [p, q, r] = arrowPoints(g);
+      ctx.fillStyle = L.color;
+      ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); ctx.lineTo(r[0], r[1]); ctx.closePath(); ctx.fill();
+    }
+  }
+  ctx.setLineDash([]);
+  // the nodes, each with its label (a label drawn later lies over the nodes before it, as in the svg)
+  const labels = all || k * 12.5 >= 3;
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.lineJoin = 'round';
+  const bg = css('--bg');
+  for (const d of gData) {
+    if (!seen(d.x - d.w / 2 - 4, d.y - 26, d.x + d.w / 2 + 4, d.y + 16)) continue;
+    const L = nodeLook(d);
+    ctx.globalAlpha = L.op;
+    if (L.ring) {
+      ctx.beginPath(); ctx.arc(d.x, d.y, RING_R, 0, 2 * Math.PI);
+      ctx.lineWidth = 2.2; ctx.strokeStyle = L.ring; ctx.stroke();
+    }
+    ctx.translate(d.x, d.y);
+    const sh = shapePath2D(d.i);
+    ctx.fillStyle = L.fill; ctx.fill(sh);
+    ctx.lineWidth = L.width; ctx.strokeStyle = L.stroke; ctx.setLineDash(dash(L.dash)); ctx.stroke(sh);
+    ctx.setLineDash([]);
+    ctx.translate(-d.x, -d.y);
+    // too small to read: only the focus and the selected keep their labels
+    if (!labels && d.i !== selected && d.i !== focusNode) continue;
+    const x0 = d.x - d.lw / 2, y = d.y + LABEL_Y;
+    ctx.lineWidth = 3; ctx.strokeStyle = bg;              // the halo that keeps a label clear of the links
+    for (const r of d.runs) { ctx.font = fontOf(r); ctx.strokeText(r.t, x0 + r.dx, y); }
+    for (const r of d.runs) { ctx.font = fontOf(r); ctx.fillStyle = r.color; ctx.fillText(r.t, x0 + r.dx, y); }
+  }
+  ctx.globalAlpha = 1;
+}
+
+// ---- what is under the pointer: a node (its mark, its ring, its label), else a link (within a band of
+// 11 units, at least 8 pixels wide); the one drawn last lies on top
+function nodeAt(gx, gy) {
+  for (let q = gData.length - 1; q >= 0; q--) {
+    const d = gData[q], dx = gx - d.x, dy = gy - d.y;
+    const r = d.i === selected || d.i === focusNode ? RING_R + 1.5 : 8;
+    if (dx * dx + dy * dy <= r * r) return d;
+    if (Math.abs(dx) <= d.lw / 2 + 1 && dy >= LABEL_Y - 13 && dy <= LABEL_Y + 4) return d;
+  }
+  return null;
+}
+const hitCtx = document.createElement('canvas').getContext('2d');
+function edgeAt(gx, gy, k) {
+  const lw = Math.max(11, 8 / k), m = lw / 2;
+  hitCtx.lineWidth = lw;
+  for (let q = gLinks.length - 1; q >= 0; q--) {
+    const d = gLinks[q], g = edgeGeom(d);
+    if (!g || gx < g.x0 - m || gx > g.x1 + m || gy < g.y0 - m || gy > g.y1 + m) continue;
+    if (hitCtx.isPointInStroke(g.path, gx, gy)) return d;
+  }
+  return null;
+}
+function pointerGraph(ev) {
+  const tr = d3.zoomTransform(svg.node());
+  const [x, y] = tr.invert(d3.pointer(ev, svg.node()));
+  return { x, y, k: tr.k };
+}
+// what the svg's <title> said, as a tip beside the pointer
+function nodeTip(i) {
+  const hin = hiddenIn(i), hout = hiddenOut(i);
+  let tip = `${marker(i)} ${shown(i)}${G.nodes[i].g ? ' “' + G.nodes[i].g + '”' : ''}`;
+  const ws = wordWarnings(i);
+  if (ws.length && !tolkien()) tip += '\n⚠ ' + ws.join(', ');
+  if (hin) tip += '\n' + t('hidden.in', { n: hin });
+  if (hout) tip += '\n' + t('hidden.out', { n: hout });
+  return tip;
+}
+function edgeTip(d) {
+  let tip = `${REL[d.rel][1]}: ${marker(d.a)} ${shown(d.a)} → ${marker(d.b)} ${shown(d.b)}`;
+  if (d.via) tip += '\n' + t('edge.via');
+  if (d.x && d.x.nm) tip += '\n' + t('edge.nm');
+  if (d.x && d.x.sc) tip += '\n' + t('edge.sc');
+  if (d.x && d.x.st) tip += '\n' + t('edge.st');
+  for (const [src, chain] of (d.x && d.x.w) || []) tip += '\n' + t('card.written', { src, chain: chain.join(' > ') });
+  return tip;
+}
+let tipTimer = 0, hoverKey = null, lastPointer = [0, 0];
+function hideTip() { clearTimeout(tipTimer); hoverKey = null; ovTip.hidden = true; }
+function placeTip(cx, cy) {
+  const box = svg.node().getBoundingClientRect();
+  const tw = ovTip.offsetWidth, th = ovTip.offsetHeight;
+  const x = cx - box.left + 14, y = cy - box.top + 14;
+  ovTip.style.left = Math.max(4, Math.min(x, box.width - tw - 6)) + 'px';
+  ovTip.style.top = (y + th > box.height ? y - th - 22 : y) + 'px';
+}
+function showTip(text) {
+  ovTip.textContent = text;
+  ovTip.hidden = false;
+  placeTip(...lastPointer);
+}
+svg.on('mousemove.gr', ev => {
+  if (mode !== 'graph') return;
+  lastPointer = [ev.clientX, ev.clientY];
+  if (ev.buttons) { hideTip(); return; }
+  const p = pointerGraph(ev);
+  const n = nodeAt(p.x, p.y), e = n ? null : edgeAt(p.x, p.y, p.k);
+  svg.classed('hover', !!(n || e));
+  const key = n ? 'n' + n.i : e ? 'e' + e.k : null;
+  if (key !== hoverKey) {
+    hideTip();
+    hoverKey = key;
+    if (key) tipTimer = setTimeout(() => showTip(n ? nodeTip(n.i) : edgeTip(e)), 450);
+  } else if (key && !ovTip.hidden) placeTip(...lastPointer);
+}).on('mouseleave.gr', () => { if (mode === 'graph') { hideTip(); svg.classed('hover', false); } })
+  .on('wheel.gr', () => { if (mode === 'graph') hideTip(); }, { passive: true });
+// a click: on a node -- select it (two or three: expand, fold); on a link -- pick it; elsewhere -- let
+// the picked link go
+svg.on('click.gr', ev => {
+  if (mode !== 'graph' || ev.defaultPrevented) return;
+  const p = pointerGraph(ev);
+  const n = nodeAt(p.x, p.y);
+  if (n) { select(n.i); clicks(n.i, ev.detail, ev); return; }
+  const e = edgeAt(p.x, p.y, p.k);
+  if (e) selectEdge(e); else clearEdge();
+});
+
+// Eldamo's ⚠️ on a word (vocabulary and deprecation pages): deprecated, deleted, rejected,
+// doubtful, unglossed, early. The label shows ⚠ for all but an early form alone (its band and
+// marker say that already); the card names them
+const isDeprecated = i => G.nodes[i].x === 'd' || (G.nodes[i].wn || []).includes(G.warn.indexOf('deprecated'));
+function warnMark(i) {
+  const n = G.nodes[i];
+  if (tolkien()) return false;             // the ⚠ is Neo-Eldarin advice
+  return n.k !== 'root' && (n.x === 'o' || (n.wn || []).some(w => G.warn[w] !== 'early'));
+}
+function wordWarnings(i, skipDeprecated) {
+  const n = G.nodes[i];
+  if (n.k === 'root') return [];
+  return (n.wn || []).map(w => G.warn[w]).filter(w => !(skipDeprecated && w === 'deprecated')).map(w => t('warnw.' + w));
+}
+function shapePath(i) {
+  const n = G.nodes[i];
+  if (n.k === 'root') return d3.symbol(d3.symbolDiamond, 150)();
+  if (n.k === 'form') return d3.symbol(d3.symbolCircle, 70)();
+  return d3.symbol(d3.symbolCircle, 120)();
+}
+function shapeFill(i) {
+  const n = G.nodes[i];
+  if (n.k === 'root') return n.rec ? css('--n-root') : css('--bg');
+  if (n.k === 'protoform' || (n.x === 'm' && !tolkien())) return css('--bg');     // a merged form: hollow (Tolkien's: a word)
+  return nodeColor(i);
+}
+
+function fitView(animate) {
+  if (mode !== 'graph') return;
+  const items = [...shownNodes].map(i => pos.get(i)).filter(Boolean);
+  if (!items.length) return;
+  const box = svg.node().getBoundingClientRect();
+  const xs = items.map(p => p.x), ys = items.map(p => p.y);
+  // room for the band labels on top, and for the buttons over the graph
+  const x0 = Math.min(...xs) - 90, x1 = Math.max(...xs) + 90, y0 = Math.min(...ys) - (parMode === 'bands' ? 70 : 40), y1 = Math.max(...ys) + 24;
+  const top = 52, h = box.height - top;
+  const k = Math.min(1.6, 0.92 * Math.min(box.width / (x1 - x0), h / (y1 - y0)));
+  const tr = d3.zoomIdentity.translate(box.width / 2 - k * (x0 + x1) / 2, top + h / 2 - k * (y0 + y1) / 2).scale(k);
+  (animate ? svg.transition().duration(450) : svg).call(zoom.transform, tr);
+}
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') clearEdge(); });
+$('fit').addEventListener('click', () => (mode === 'graph' ? fitView(!reduced) : ovFit(!reduced)));
+// a new layout, and every node moved by hand freed
+$('relayout').addEventListener('click', () => { for (const i of visible) pos.delete(i); render(true); });
+
+// ---------------------------------------------------------------- the card
+function nodeButton(i) {
+  const n = G.nodes[i];
+  const cls = n.k === 'root' ? 'fm root-fm' : 'fm';
+  return `<button type="button" data-node="${i}"${n.x === 'd' ? ' class="dep"' : n.x === 'o' ? ' class="oth"' : n.x === 'n' ? ' class="nam"' : ''}>${markerHtml(i)}${n.k === 'root' ? '' : ' '}<span class="${cls}">${esc(shown(i))}</span></button>`
+    + (n.g ? ` <span class="gl">“${esc(n.g)}”</span>` : '');
+}
+function relTag(rel) {
+  return `<span class="rel" style="color:${css('--e-' + rel)}">${esc(REL[rel][0])}</span>`;
+}
+// ---- a picked link: it and its two nodes stand out, the card describes it
+let selEdge = null;
+function markEdge() { grRequestDraw(); }
+function selectEdge(d) {
+  selEdge = d;
+  markEdge();
+  const x = d.x || {};
+  const written = (x.w || []).map(([src, chain]) => `<li class="written">${esc(t('card.written', { src, chain: chain.join(' > ') }))}</li>`).join('');
+  const flags = [];
+  if (d.via) flags.push(`<span class="tag">${esc(t('edge.via'))}</span>`);
+  if (x.nm) flags.push(`<span class="tag warn">${esc(t('tag.nm'))}</span>`);
+  if (x.sc) flags.push(`<span class="tag" title="${esc(t('tag.direct.title'))}">${esc(t('tag.direct'))}</span>`);
+  if (x.st) flags.push(`<span class="tag warn" title="${esc(t('edge.st'))}">${esc(t('tag.struck'))}</span>`);
+  $('card').innerHTML = `<div class="card-head edge-card">
+      <div class="meta">${esc(t('card.edge'))}</div>
+      <div class="big">${relTag(d.rel)}</div>
+    </div>
+    ${flags.length ? `<div class="tags">${flags.join('')}</div>` : ''}
+    <div class="sec"><h3>${esc(t('card.edgeFrom'))}</h3><ul class="links"><li>${nodeButton(d.a)}</li></ul></div>
+    <div class="sec"><h3>${esc(t('card.edgeTo'))}</h3><ul class="links"><li>${nodeButton(d.b)}</li></ul></div>
+    ${written ? `<div class="sec"><h3>${esc(t('card.edgeWritten'))}</h3><ul class="links">${written}</ul></div>` : ''}
+    <p class="hint">${esc(t('card.edgeHint'))}</p>`;
+}
+function clearEdge() {
+  if (!selEdge) return;
+  selEdge = null;
+  markEdge();
+  if (selected >= 0) select(selected);
+}
+function select(i) {
+  if (selEdge) { selEdge = null; markEdge(); }
+  selected = i;
+  // a selected node is wider (its ring): the links into it end farther out
+  if (mode === 'graph' && sim) { for (const d of gLinks) d._p = linkPath(d); grRequestDraw(); }
+  if (ovBuilt) ovRequestDraw();
+  const n = G.nodes[i];
+  const id = G.ids[i];
+  const lang = langName(n.l);
+  const kind = t(n.k === 'root' ? 'kind.root' : n.x === 'n' ? 'kind.name' : n.x === 'o' ? (PRIM.has(n.l) ? 'kind.primitiveWord' : 'kind.word')
+    : n.k === 'protoform' ? 'kind.protoform' : n.k === 'form' ? 'kind.form'
+    : (n.l === 'p' || n.l === 'mp' || n.l === 'np') ? 'kind.primitiveWord' : 'kind.word');
+  const tags = [];
+  if (isDeprecated(i) && !tolkien()) tags.push(n.ins && n.ins.length
+    ? `<span class="tag warn" title="${esc(t('tag.deprecatedWord.title'))}">⚠ ${esc(t('tag.deprecatedWord'))}</span>`
+    : `<span class="tag warn" title="${esc(t('tag.deprecatedNone.title'))}">⚠ ${esc(t('tag.deprecatedNone'))}</span>`);
+  if (n.k !== 'root' && !tolkien()) for (const w of wordWarnings(i, true)) tags.push(`<span class="tag warn">⚠ ${esc(w)}</span>`);
+  if (n.x === 'm' && !tolkien()) tags.push(`<span class="tag" title="${esc(t('tag.mergedForm.title'))}">${esc(t('tag.mergedForm'))}</span>`);
+  if (n.x === 'o' && !tolkien()) tags.push(`<span class="tag warn" title="${esc(t('tag.outside.title'))}">⚠ ${esc(t('tag.outside'))}</span>`);
+  if (n.x === 'n') tags.push(`<span class="tag" title="${esc(t('tag.name.title'))}">${esc(t('tag.name'))}</span>`);
+  if (n.grp && !n.x) tags.push(`<span class="tag">${esc(t('group.' + n.grp))}</span>`);
+  if (n.s) tags.push(`<span class="tag">${esc(speech(n.s))}</span>`);
+  if (n.k === 'word' || n.x === 'o' || n.x === 'n') tags.push(n.r ? `<span class="tag">${esc(t('tag.roots', { rule: has('rule.' + n.r) ? t('rule.' + n.r) : n.r }))}</span>` : `<span class="tag warn">${esc(t('tag.noRoot'))}</span>`);
+  if (n.u) tags.push(`<span class="tag warn" title="${esc(t('tag.indirect.title'))}">${esc(t('tag.indirect'))}</span>`);
+  if (n.k === 'root' && n.rec === 1) tags.push(`<span class="tag ok">${esc(t('tag.recommended'))}</span>`);
+  if (n.k === 'root') for (const w of n.wn || []) tags.push(`<span class="tag warn">⚠ ${esc(t('warn.' + G.warn[w]))}</span>`);
+  if (n.nl) tags.push(`<span class="tag" title="${esc(t('tag.notListed.title'))}">${esc(t('tag.notListed'))}</span>`);
+  if (n.dc) tags.push(`<span class="tag">${esc(t('tag.derivatives', { n: n.dc }))}</span>`);
+  if (n.ds) tags.push(`<span class="tag">${esc(t('tag.noRootDerivatives', { n: n.ds }))}</span>`);
+
+  let html = `<div class="card-head">
+      <div class="big">${markerHtml(i)}${n.k === 'root' ? '' : ' '}<span class="${n.k === 'root' ? 'fm root-fm' : 'fm'}">${esc(shown(i))}</span></div>
+      ${n.g ? `<div class="gl">“${esc(n.g)}”</div>` : ''}
+      <div class="meta">${esc(kind)} · ${esc(lang)}${n.sp && n.sp !== n.f ? ` · ${esc(t('card.dbForm', { f: n.f }))}` : ''}</div>
+    </div>
+    <div class="tags">${tags.join('')}</div>`;
+  if (n.ins && n.ins.length && !tolkien()) {
+    html += `<div class="sec"><h3>${esc(t('card.instead'))}</h3><ul class="links">${n.ins.map(x => indexOf.has(x) ? `<li>${nodeButton(indexOf.get(x))}</li>` : '').join('')}</ul></div>`;
+  }
+  if (visible.has(i) && i !== focusNode && !passes(i)) {
+    html += `<p class="more">${esc(t('card.filteredOut'))}</p>`;
+  }
+  html += `<div class="actions">
+      ${i !== focusNode ? `<button class="btn primary" type="button" data-act="focus">${esc(t('act.focus'))}</button>` : ''}
+      <button class="btn" type="button" data-act="expand">${esc(t(expanded.has(i) && visible.has(i) ? 'act.collapse' : 'act.expand'))}</button>
+      ${visible.has(i) && mode === 'graph' && hiddenIn(i) ? `<button class="btn" type="button" data-act="expand-in" title="${esc(t('act.expandIn.title'))}">${esc(t('act.expandIn', { n: hiddenIn(i) }))}</button>` : ''}
+      ${visible.has(i) && mode === 'graph' && hiddenOut(i) ? `<button class="btn" type="button" data-act="expand-out" title="${esc(t('act.expandOut.title'))}">${esc(t('act.expandOut', { n: hiddenOut(i) }))}</button>` : ''}
+      ${visible.has(i) && mode === 'graph' && hasFoldable(i) ? `<button class="btn" type="button" data-act="fold">${esc(t('act.collapseDer'))}</button>` : ''}
+      ${i !== focusNode && visible.has(i) ? `<button class="btn" type="button" data-act="remove">${esc(t('act.remove'))}</button>` : ''}
+      <button class="btn" type="button" data-act="path-a" title="${esc(t('act.pathFrom.title'))}">${esc(t('act.pathFrom'))}</button>
+      <button class="btn" type="button" data-act="path-b" title="${esc(t('act.pathTo.title'))}">${esc(t('act.pathTo'))}</button>
+      ${/^\d+$/.test(id) ? `<a class="ext" href="${SITE}${esc(id)}.html" target="_blank" rel="noopener">${esc(t('card.eldamo'))}</a>` : ''}
+    </div>`;
+
+  // in Tolkien's vocabulary the card is Eldamo's page without ?neo: no merges, nothing of Neo-Eldarin
+  const cardEdge = (k, other) => !(tolkien() && (G.edges[k][2] === RELS_COMBINE || NEO.has(G.nodes[other].l)));
+  const from = inE[i].filter(k => cardEdge(k, G.edges[k][0])).map(k => G.edges[k]).filter(e => relName(e[2]) !== 'instead' && relName(e[2]) !== 'cognates');
+  const replaces = inE[i].map(k => G.edges[k]).filter(e => relName(e[2]) === 'instead');
+  if (from.length) {
+    html += `<div class="sec"><h3>${esc(t('card.from'))}</h3><ul class="links">${from.map(e => {
+      const rel = relName(e[2]);
+      const x = e[3] || {};
+      const written = (x.w || []).map(([src, chain]) => `<span class="written">${esc(t('card.written', { src, chain: chain.join(' > ') }))}</span>`).join('');
+      return `<li>${relTag(rel)} ${nodeButton(e[0])}${x.nm ? ` <span class="tag warn">${esc(t('tag.nm'))}</span>` : ''}${x.sc ? ` <span class="tag" title="${esc(t('tag.direct.title'))}">${esc(t('tag.direct'))}</span>` : ''}${x.st ? ` <span class="tag warn" title="${esc(t('edge.st'))}">${esc(t('tag.struck'))}</span>` : ''}${written}</li>`;
+    }).join('')}</ul></div>`;
+  }
+  if (replaces.length && !tolkien()) {
+    html += `<div class="sec"><h3>${esc(t('card.replaces', { n: replaces.length }))}</h3><ul class="links">${replaces.slice(0, 60).map(e =>
+      `<li>${nodeButton(e[0])}</li>`).join('')}</ul></div>`;
+  }
+  const cogs = [...inE[i].filter(isCognates).map(k => G.edges[k][0]), ...outE[i].filter(isCognates).map(k => G.edges[k][1])]
+    .filter(x => !(tolkien() && NEO.has(G.nodes[x].l)));
+  if (cogs.length) {
+    html += `<div class="sec"><h3>${esc(t('card.cognates', { n: cogs.length }))}</h3><ul class="links">${cogs.map(x => `<li>${nodeButton(x)}</li>`).join('')}</ul></div>`;
+  }
+  const to = outE[i].filter(k => cardEdge(k, G.edges[k][1])).map(k => G.edges[k]).filter(e => relName(e[2]) !== 'instead' && relName(e[2]) !== 'cognates');
+  if (to.length) {
+    const LIM = 60;
+    html += `<div class="sec"><h3>${esc(t('card.gives', { n: to.length }))}</h3><ul class="links">${to.slice(0, LIM).map(e =>
+      `<li>${relTag(relName(e[2]))} ${nodeButton(e[1])}</li>`).join('')}</ul>${to.length > LIM ? `<div class="more">${esc(t('card.more', { n: to.length - LIM }))}</div>` : ''}</div>`;
+  }
+  $('card').innerHTML = html;
+}
+$('card').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-node]');
+  if (b) {
+    const i = +b.dataset.node;
+    if (visible.has(i)) select(i); else focus(i);
+    return;
+  }
+  const a = ev.target.closest('[data-act]');
+  if (!a) return;
+  if (a.dataset.act === 'focus') focus(selected);
+  else if (a.dataset.act === 'expand') {
+    if (!visible.has(selected) || mode !== 'graph') focus(selected);
+    else toggle(selected);
+    select(selected);
+  }
+  else if (a.dataset.act === 'expand-in' || a.dataset.act === 'expand-out') {
+    expand(selected, a.dataset.act === 'expand-in' ? 'in' : 'out');
+    select(selected);
+  }
+  else if (a.dataset.act === 'remove') removeNode(selected);
+  else if (a.dataset.act === 'path-a' || a.dataset.act === 'path-b') setPathEnd(a.dataset.act.slice(-1), selected);
+  else if (a.dataset.act === 'fold') { collapseDerivatives(selected); select(selected); }
+});
+
+// ---------------------------------------------------------------- search
+const fold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+  .replace(/[¹²³⁴⁵⁶⁷⁸⁹⁰√✶*!^#†()\-]/g, '').toLowerCase()
+  .replace(/qu/g, 'q').replace(/c/g, 'k').replace(/ks/g, 'x');
+let keys = null;
+function searchKeys() {
+  if (!keys) keys = G.nodes.map(n => [fold(n.f), fold(n.sp), (n.g || '').toLowerCase()]);
+  return keys;
+}
+// the nodes a query finds, best first: the form or the spelling (exact, then its beginning), the
+// gloss (whole, then a word of it), the form inside, the gloss inside; scope: '', 'nq'/'ns'/'np', 'root'
+function findWords(raw, limit, scope = '') {
+  raw = String(raw || '').trim();
+  if (!raw) return [];
+  const q = fold(raw), ql = raw.toLowerCase();
+  const K = searchKeys();
+  const hits = [];
+  for (let i = 0; i < N; i++) {
+    const n = G.nodes[i];
+    if (scope === 'root' ? n.k !== 'root' : scope ? n.grp !== scope : !(n.grp || n.k === 'root')) continue;
+    if (!kindShown(n)) continue;          // the switches of the legend and the vocabulary
+    const [f, sp, g] = K[i];
+    let s = -1;
+    if (q && (f === q || sp === q)) s = 0;
+    else if (q && (f.startsWith(q) || sp.startsWith(q))) s = 1;
+    else if (g && g.replace(/[*?()\[\]"“”]/g, '').trim() === ql) s = 1.5;
+    else if (g && g.split(/[^\p{L}]+/u).includes(ql)) s = 2;
+    else if (q && f.includes(q)) s = 3;
+    else if (g && g.includes(ql)) s = 4;
+    if (s >= 0) hits.push([s, n.k === 'root' ? 1 : n.x ? 2 : 0, f.length, i]);
+  }
+  hits.sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2]);
+  return hits.slice(0, limit).map(h => h[3]);
+}
+function search() {
+  const raw = $('q').value.trim();
+  const box = $('results');
+  if (!raw) { box.hidden = true; return; }
+  box.innerHTML = findWords(raw, 40, $('scope').value).map(i => {
+    const n = G.nodes[i];
+    const tag = n.x === 'd' && !tolkien() ? ` <span class="tag warn">⚠ ${esc(t('tag.deprecatedWord'))}</span>` : n.x === 'm' && !tolkien() ? ` <span class="tag">${esc(t('tag.mergedForm'))}</span>`
+      : n.x === 'o' && !tolkien() ? ` <span class="tag warn">⚠ ${esc(t('tag.outside'))}</span>` : n.x === 'n' ? ` <span class="tag">${esc(t('tag.name'))}</span>` : '';
+    return `<button type="button" data-hit="${i}">${markerHtml(i)}${n.k === 'root' ? '' : ' '}<span class="${n.k === 'root' ? 'fm root-fm' : 'fm'}">${esc(shown(i))}</span>`
+      + `${n.g ? ` <span class="gl">“${esc(n.g)}”</span>` : ''}${tag}</button>`;
+  }).join('') || `<div class="none">${esc(t('search.none'))}</div>`;
+  box.hidden = false;
+}
+$('q').addEventListener('input', search);
+$('scope').addEventListener('change', search);
+$('results').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-hit]');
+  if (!b) return;
+  $('results').hidden = true;
+  focus(+b.dataset.hit);
+});
+$('q').addEventListener('keydown', ev => {
+  if (ev.key === 'Enter') { const b = $('results').querySelector('[data-hit]'); if (b) { $('results').hidden = true; focus(+b.dataset.hit); } }
+  if (ev.key === 'Escape') $('results').hidden = true;
+});
+
+// ---------------------------------------------------------------- all roots
+// The roots of Eldamo's roots-np list as a map: grouped by their first letter, a circle's area by
+// the number of words derived from it; filters by conception, status and derivatives.
+const views = { graph: null, roots: null };          // the zoom of each view
+let ovBuilt = false;
+const initial = i => {
+  const f = String(G.nodes[i].f || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\p{L}]/gu, '');
+  return (f[0] || '?').toUpperCase();
+};
+function ovValue(i) {
+  const n = G.nodes[i];
+  return n.k === 'root' ? (n.dc || 0) : (n.ds || 0);
+}
+const PRIM = new Set(['p', 'mp', 'ep', 'np']);
+function ovCategory(i) {
+  const n = G.nodes[i];
+  if (n.cg) return null;          // known only as someone's cognate: not a start of any chain here
+  if (!kindShown(n)) return null;          // the switches of the legend and the vocabulary (ᴺ√ in Tolkien's)
+  if (n.k === 'root') return ('rec' in n) && !n.nl ? 'roots' : null;
+  if (!n.nr || (n.x === 'm' && !tolkien())) return null;     // a merged form stands with its word (Tolkien's: alone)
+  return PRIM.has(n.l) ? 'proto' : 'words';
+}
+function ovFill(i) {
+  const n = G.nodes[i];
+  if (n.k === 'root') return n.rec ? css('--n-root') : css('--bg');
+  if (n.grp) return css('--n-' + n.grp);
+  return css('--bg');
+}
+function ovStroke(i) {
+  const n = G.nodes[i];
+  if (n.k === 'root') return css('--n-root');
+  if (n.grp) return css('--n-' + n.grp);
+  return PRIM.has(n.l) ? css('--n-np') : css('--n-form');
+}
+function buildOverview() {
+  const show = { roots: $('ov-roots').checked, proto: $('ov-proto').checked, words: $('ov-words').checked };
+  $('ov-rec').disabled = !show.roots;      // a filter of roots
+  const onlyRec = $('ov-rec').checked, onlyFree = $('ov-free').checked;
+  const items = [];
+  const counts = { roots: 0, proto: 0, words: 0 };
+  for (let i = 0; i < N; i++) {
+    const cat = ovCategory(i);
+    if (!cat || !show[cat]) continue;
+    const n = G.nodes[i];
+    if (langOn[n.l] === false) continue;      // the languages of the legend (√, ᴹ√, ᴱ√, ᴺ√ for roots)
+    if (cat === 'roots' && onlyRec && !n.rec) continue;
+    if (onlyFree && ovValue(i)) continue;
+    items.push([cat, i]);
+    counts[cat]++;
+  }
+  const cats = ['roots', 'proto', 'words'].filter(c => counts[c]);
+  const tree = {
+    children: cats.map(c => ({
+      cat: c,
+      children: [...d3.group(items.filter(x => x[0] === c).map(x => x[1]), initial)]
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([key, v]) => ({ key, children: v.map(i => ({ i })) })),
+    })),
+  };
+  const h = d3.hierarchy(tree).sum(d => (d.i != null ? 1 + ovValue(d.i) : 0)).sort((a, b) => b.value - a.value);
+  d3.pack().size([1000, 1000]).padding(d => (d.depth === 0 ? 18 : d.depth === 1 ? 10 : 1.2))(h);
+  ovCats = (h.children || []).length > 1 ? h.children : [];
+  ovLetters = (h.children || []).flatMap(c => c.children || []);
+  ovLeaves = h.leaves().filter(d => d.data.i != null);
+  ovBuilt = true;
+  ovCounts = counts;
+  showNote();
+  ovRequestDraw();
+}
+let ovCounts = { roots: 0, proto: 0, words: 0 };
+// The map is drawn on a canvas: thousands of svg circles and labels made every step of the zoom
+// lay out the text anew (most of the time of a frame); a canvas redraws only what is on screen
+const ovCanvas = $('ov-canvas'), ovTip = $('ov-tip');
+let ovCats = [], ovLetters = [], ovLeaves = [], ovFrame = 0;
+function ovRequestDraw() {
+  if (!ovFrame) ovFrame = requestAnimationFrame(() => { ovFrame = 0; ovDraw(); });
+}
+function ovDraw() {
+  if (mode !== 'roots') return;
+  const w = ovCanvas.clientWidth, h = ovCanvas.clientHeight, dpr = window.devicePixelRatio || 1;
+  if (ovCanvas.width !== Math.round(w * dpr) || ovCanvas.height !== Math.round(h * dpr)) {
+    ovCanvas.width = Math.round(w * dpr); ovCanvas.height = Math.round(h * dpr);
+  }
+  const ctx = ovCanvas.getContext('2d');
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, ovCanvas.width, ovCanvas.height);
+  ovPaint(ctx, w, h, dpr, d3.zoomTransform(svg.node()));
+}
+// the map on a canvas of w x h css pixels, at the transform tr
+function ovPaint(ctx, w, h, dpr, tr) {
+  const k = tr.k;
+  // what is on screen, in map units
+  const vx0 = -tr.x / k, vy0 = -tr.y / k, vx1 = (w - tr.x) / k, vy1 = (h - tr.y) / k;
+  const seen = d => d.x + d.r > vx0 && d.x - d.r < vx1 && d.y + d.r > vy0 && d.y - d.r < vy1;
+  const C = { line: css('--line'), muted: css('--muted'), ink: css('--ink'), bg: css('--bg'), focus: css('--focus') };
+  const fForm = css('--f-form'), fUi = css('--f-ui');
+  ctx.setTransform(dpr * k, 0, 0, dpr * k, dpr * tr.x, dpr * tr.y);
+  const circle = d => { ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, 2 * Math.PI); };
+  // categories: a dashed ring
+  ctx.lineWidth = 1 / k; ctx.strokeStyle = C.line; ctx.setLineDash([3 / k, 3 / k]);
+  for (const d of ovCats) { if (!seen(d)) continue; ctx.beginPath(); ctx.arc(d.x, d.y, d.r + 4, 0, 2 * Math.PI); ctx.stroke(); }
+  ctx.setLineDash([]);
+  // letters: a faint disc
+  for (const d of ovLetters) {
+    if (!seen(d)) continue;
+    circle(d);
+    ctx.globalAlpha = .25; ctx.fillStyle = C.line; ctx.fill();
+    ctx.globalAlpha = 1; ctx.strokeStyle = C.line; ctx.stroke();
+  }
+  // leaves
+  const fills = new Map();
+  const fillOf = i => { let f = fills.get(i); if (f === undefined) { f = ovFill(i); fills.set(i, f); } return f; };
+  const strokes = new Map();
+  ctx.lineWidth = 0.6;
+  for (const d of ovLeaves) {
+    if (!seen(d)) continue;
+    const i = d.data.i, n = G.nodes[i], f = fillOf(i);
+    circle(d);
+    ctx.globalAlpha = f === C.bg ? 1 : 0.85; ctx.fillStyle = f; ctx.fill(); ctx.globalAlpha = 1;
+    let st = strokes.get(n.grp || n.k + n.l);
+    if (st === undefined) { st = ovStroke(i); strokes.set(n.grp || n.k + n.l, st); }
+    ctx.strokeStyle = st;
+    if (n.k === 'root' && !n.rec) ctx.setLineDash([1.5, 1]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  const sel = ovLeaves.find(d => d.data.i === selected);
+  if (sel) { circle(sel); ctx.lineWidth = 2.2; ctx.strokeStyle = C.focus; ctx.stroke(); }
+  // the labels in screen pixels, so that small text stays sharp at any zoom
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.textAlign = 'center';
+  const at = (x, y) => [tr.x + x * k, tr.y + y * k];
+  ctx.fillStyle = C.muted; ctx.textBaseline = 'alphabetic';
+  for (const d of ovCats) {
+    if (!seen(d)) continue;
+    const [x, y] = at(d.x, d.y - d.r - 8);
+    ctx.font = `600 ${Math.max(9, Math.min(d.r * 0.12, 22)) * k}px ${fUi}`;
+    ctx.fillText(t('ov.show.' + d.data.cat), x, y);
+  }
+  ctx.globalAlpha = .55;
+  for (const d of ovLetters) {
+    if (!seen(d)) continue;
+    const size = Math.min(d.r * 0.3, 26) * k;
+    if (size < 4) continue;
+    const [x, y] = at(d.x, d.y - d.r + Math.min(d.r * 0.35, 30));
+    ctx.font = `600 ${size}px ${fForm}`;
+    ctx.fillText(d.data.key, x, y);
+  }
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = C.ink; ctx.textBaseline = 'middle';
+  for (const d of ovLeaves) {
+    if (d.r * k < 9 || !seen(d)) continue;      // a label once its circle can hold it
+    const [x, y] = at(d.x, d.y);
+    ctx.font = `600 ${Math.max(1.2, Math.min(d.r * 0.42, 14)) * k}px ${fForm}`;
+    ctx.fillText(ovLabel(d.data.i), x, y);
+  }
+}
+const ovLabel = i => marker(i) + (G.nodes[i].k === 'root' ? '' : ' ') + shown(i);
+// the leaf under the pointer: the innermost circle that holds it
+function ovHit(ev) {
+  const [px, py] = d3.pointer(ev, svg.node());
+  const tr = d3.zoomTransform(svg.node());
+  const [x, y] = tr.invert([px, py]);
+  for (const d of ovLeaves) if ((x - d.x) ** 2 + (y - d.y) ** 2 <= d.r * d.r) return d;
+  return null;
+}
+svg.on('click.ov', ev => {
+  if (mode !== 'roots' || ev.defaultPrevented) return;
+  const d = ovHit(ev);
+  if (d) select(d.data.i);
+}).on('dblclick.ov', ev => {
+  if (mode !== 'roots') return;
+  const d = ovHit(ev);
+  if (d) focus(d.data.i);
+}).on('mousemove.ov', ev => {
+  if (mode !== 'roots') return;
+  const d = ev.buttons ? null : ovHit(ev);
+  svg.classed('hover', !!d);
+  if (!d) { ovTip.hidden = true; return; }
+  const i = d.data.i, n = G.nodes[i], v = ovValue(i);
+  ovTip.textContent = `${marker(i)} ${shown(i)}${n.g ? ' “' + n.g + '”' : ''}${v ? '\n' + t('tag.noRootDerivatives', { n: v }) : ''}`;
+  ovTip.hidden = false;
+  placeTip(ev.clientX, ev.clientY);
+}).on('mouseleave.ov', () => { if (mode === 'roots') { ovTip.hidden = true; svg.classed('hover', false); } });
+window.addEventListener('resize', () => { if (mode === 'roots') ovRequestDraw(); else grRequestDraw(); });
+function ovFit(animate) {
+  const box = svg.node().getBoundingClientRect();
+  // leave the filter panel clear where there is room beside it
+  const left = box.width > 760 ? $('ov-tools').getBoundingClientRect().right - box.left + 8 : 0;
+  const w = box.width - left;
+  const k = 0.94 * Math.min(w, box.height) / 1000;
+  const tr = d3.zoomIdentity.translate(left + (w - 1000 * k) / 2, (box.height - 1000 * k) / 2).scale(k);
+  (animate ? svg.transition().duration(450) : svg).call(zoom.transform, tr);
+}
+function setMode(m) {
+  if (m === mode) return;
+  views[mode] = d3.zoomTransform(svg.node());
+  mode = m;
+  grCanvas.hidden = m !== 'graph';
+  ovCanvas.hidden = m !== 'roots';
+  hideTip();
+  svg.classed('hover', false);
+  $('mode-graph').setAttribute('aria-pressed', String(m === 'graph'));
+  $('mode-roots').setAttribute('aria-pressed', String(m === 'roots'));
+  $('ov-tools').hidden = m !== 'roots';
+  $('relayout').hidden = m !== 'graph';
+  if (m === 'roots') {
+    if (!ovBuilt) buildOverview();
+    if (views.roots) svg.call(zoom.transform, views.roots); else ovFit(false);
+    try { history.replaceState(null, '', '#all-roots'); } catch (e) { /* the frame may refuse */ }
+  } else {
+    if (views.graph) svg.call(zoom.transform, views.graph);
+    if (focusNode >= 0) { try { history.replaceState(null, '', '#n-' + G.ids[focusNode]); } catch (e) { /* the frame may refuse */ } }
+    grRequestDraw();
+  }
+  showNote();
+}
+$('mode-graph').addEventListener('click', () => setMode('graph'));
+$('mode-roots').addEventListener('click', () => setMode('roots'));
+for (const id of ['ov-roots', 'ov-proto', 'ov-words', 'ov-rec', 'ov-free']) $(id).addEventListener('change', () => { buildOverview(); ovFit(!reduced); });
+
+// ---------------------------------------------------------------- paths between two words
+// Three questions: 'origin' -- does B come from A (along the links of origin, either way round);
+// 'kin' -- the nearest common source of A and B (two chains up to it); 'any' -- the shortest chain
+// over any links. A step that crosses conceptions (a merged form, a merged or filed root, a
+// replacement, a derivation from another period) or branches (a cognate, a borrowing, "see" between
+// Quenya and Sindarin; not the way through a primitive form, which both branches share) is counted,
+// and the policy says what to do with such steps: as few as possible (first conceptions, then
+// branches, then length), none, only of one kind, or no matter.
+const REL_W = { deriv: 1, element: 1, rootderiv: 1, combine: 0.5, merged: 0.5, filed: 0.5, see: 2, cognate: 2, deprecated: 2, instead: 3, cognates: 2 };
+const LOOSE = new Set(['see', 'cognate', 'instead', 'cognates']);
+// the conception of a node: early 0, middle 1, late 2, neo 3. A pure neologism (ᴺQ., ᴺ√) is a conception of
+// its own; a word made neo from one of Tolkien's (ᴺQ.[ᴱQ.] aico from ᴱQ. aiko) keeps the conception of the
+// language in brackets: taking it up is not a crossing
+function concOf(i) {
+  const n = G.nodes[i];
+  if (!NEO.has(n.l)) return eraOf(n.l);
+  const al = altLang(n);
+  return al ? eraOf(al) : 3;
+}
+const branchKey = i => { const b = branchOf(G.nodes[i].l); return b === 'primitive' ? null : b; };
+function crossOf(k) {
+  const [a, b] = G.edges[k];
+  const ba = branchKey(a), bb = branchKey(b);
+  return { conc: concOf(a) !== concOf(b), branch: !!(ba && bb && ba !== bb) };
+}
+const pathOpt = { mode: 'kin', policy: 'fewest', loose: true };
+let pathA = -1, pathB = -1;
+let pathShown = null;               // the path on the graph: {nodes: Set, edges: Set, cross: Set}
+const pathKeep = new Set();         // its nodes, shown whatever the filters say
+const cognateKeep = new Set();      // the focus's cognates, shown whatever kind of word they are
+// can the search use the edge k, and at what cost (Infinity: no)
+function stepCost(k, ends, penalty) {
+  if (!edgeOn(k)) return Infinity;
+  const e = G.edges[k], rel = relName(e[2]), x = e[3] || {};
+  if (x.nm) return Infinity;                                       // consonants that do not match
+  if (!pathOpt.loose && (LOOSE.has(rel) || x.st)) return Infinity;
+  for (const v of [e[0], e[1]]) if (!ends.has(v) && !passes(v)) return Infinity;
+  let w = (REL_W[rel] || 1) + (x.st ? 2 : 0) + (penalty.get(k) || 0);
+  const c = crossOf(k), p = pathOpt.policy;
+  if (p === 'any') return w;
+  if (c.conc && (p === 'none' || p === 'conceptions-not')) return Infinity;
+  if (c.branch && (p === 'none' || p === 'branches-not')) return Infinity;
+  return w + (c.conc ? 1e6 : 0) + (c.branch ? 1e3 : 0);
+}
+// the moves from a node: [edge, next node, along the edge?] by the kind of search
+function* moves(v, dir) {
+  // dir: 'down' along the links of origin, 'up' against them, 'both' any link either way; links
+  // between the forms of one word (merged, filed, combine) go either way in every search
+  for (const k of outE[v]) {
+    const rel = relName(G.edges[k][2]);
+    if (dir === 'both' || PARALLEL.has(rel) || (dir === 'down' && rel !== 'instead' && rel !== 'cognates')) yield [k, G.edges[k][1], true];
+  }
+  for (const k of inE[v]) {
+    const rel = relName(G.edges[k][2]);
+    if (dir === 'both' || PARALLEL.has(rel) || (dir === 'up' && rel !== 'instead' && rel !== 'cognates')) yield [k, G.edges[k][0], false];
+  }
+}
+// Dijkstra over the whole graph (a binary heap; some 28 thousand nodes: milliseconds)
+function dijkstra(from, dir, ends, penalty) {
+  const dist = new Float64Array(N).fill(Infinity), prevE = new Int32Array(N).fill(-1), prevV = new Int32Array(N).fill(-1);
+  const along = new Uint8Array(N);
+  const heap = [[0, from]];
+  dist[from] = 0;
+  const push = it => { heap.push(it); let c = heap.length - 1; while (c) { const p = (c - 1) >> 1; if (heap[p][0] <= heap[c][0]) break; [heap[p], heap[c]] = [heap[c], heap[p]]; c = p; } };
+  const pop = () => {
+    const top = heap[0], last = heap.pop();
+    if (heap.length) { heap[0] = last; let c = 0; for (;;) { const l = 2 * c + 1, r = l + 1; let m = c; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === c) break; [heap[m], heap[c]] = [heap[c], heap[m]]; c = m; } }
+    return top;
+  };
+  while (heap.length) {
+    const [d, v] = pop();
+    if (d > dist[v]) continue;
+    for (const [k, u, fwd] of moves(v, dir)) {
+      const w = stepCost(k, ends, penalty);
+      if (w === Infinity) continue;
+      if (d + w < dist[u]) { dist[u] = d + w; prevE[u] = k; prevV[u] = v; along[u] = fwd ? 1 : 0; push([d + w, u]); }
+    }
+  }
+  return { dist, prevE, prevV, along };
+}
+// the steps from the start of a search to v: [{k, from, to}] in the order walked
+function chain(run, v) {
+  const out = [];
+  while (run.prevE[v] >= 0) { out.push({ k: run.prevE[v], from: run.prevV[v], to: v }); v = run.prevV[v]; }
+  return out.reverse();
+}
+function describePath(steps, a, b, extra = {}) {
+  const nodes = [a, ...steps.map(s => s.to)];
+  let conc = 0, branch = 0, weight = 0;
+  for (const s of steps) {
+    const c = crossOf(s.k);
+    conc += c.conc; branch += c.branch;
+    weight += REL_W[relName(G.edges[s.k][2])] || 1;
+  }
+  return Object.assign({ steps, nodes, conc, branch, weight, a, b }, extra);
+}
+// one search by the current options; penalty: extra cost of some edges (for other paths)
+function searchPath(a, b, penalty = new Map()) {
+  const ends = new Set([a, b]);
+  if (pathOpt.mode === 'any') {
+    const run = dijkstra(a, 'both', ends, penalty);
+    return run.dist[b] < Infinity ? describePath(chain(run, b), a, b, { cost: run.dist[b] }) : null;
+  }
+  if (pathOpt.mode === 'origin') {
+    const down = dijkstra(a, 'down', ends, penalty);
+    if (down.dist[b] < Infinity) return describePath(chain(down, b), a, b, { cost: down.dist[b], dir: 'down' });
+    const up = dijkstra(b, 'down', ends, penalty);          // A comes from B
+    if (up.dist[a] < Infinity) return describePath(chain(up, a).reverse().map(s => ({ k: s.k, from: s.to, to: s.from })), a, b, { cost: up.dist[a], dir: 'up' });
+    return null;
+  }
+  // kin: up from both; the common source with the least cost of the two chains
+  const ra = dijkstra(a, 'up', ends, penalty), rb = dijkstra(b, 'up', ends, penalty);
+  let best = -1, cost = Infinity;
+  for (let v = 0; v < N; v++) {
+    const c = ra.dist[v] + rb.dist[v];
+    if (c < cost) { cost = c; best = v; }
+  }
+  if (best < 0) return null;
+  // A up to the source (the walk from A, as found), then the source down to B
+  const upA = chain(ra, best), upB = chain(rb, best);
+  const steps = [...upA, ...upB.reverse().map(s => ({ k: s.k, from: s.to, to: s.from }))];
+  return describePath(steps, a, b, { cost, source: best });
+}
+const pathKey = p => p.steps.map(s => s.k).join(',');
+// the best path and up to two others: the edges of the found ones cost more on each next search; and,
+// when crossings were avoided, the shortest path with crossings if it is clearly shorter
+function findPaths(a, b) {
+  const found = [], penalty = new Map();
+  for (let round = 0; round < 3; round++) {
+    const p = searchPath(a, b, penalty);
+    if (!p) break;
+    if (!found.some(q => pathKey(q) === pathKey(p))) found.push(p);
+    for (const s of p.steps) penalty.set(s.k, (penalty.get(s.k) || 0) + 3);
+  }
+  if (found.length && pathOpt.policy !== 'any') {
+    const keep = pathOpt.policy;
+    pathOpt.policy = 'any';
+    const short = searchPath(a, b);
+    pathOpt.policy = keep;
+    if (short && short.weight <= found[0].weight - 2 && (short.conc || short.branch) && !found.some(q => pathKey(q) === pathKey(short))) {
+      short.shorter = true;
+      found.push(short);
+    }
+  }
+  return found;
+}
+const CONC_NAME = c => t('conc.' + c);
+function pathSummary(p) {
+  const concs = [...new Set(p.nodes.map(concOf))];
+  const branches = [...new Set(p.nodes.map(branchKey).filter(Boolean))];
+  const parts = [];
+  if (!p.conc) parts.push(t('path.inConc', { c: CONC_NAME(concs[0]) }));
+  else parts.push(t('path.crossConc', { list: p.nodes.map(concOf).filter((c, k, xs) => !k || c !== xs[k - 1]).map(CONC_NAME).join(' → '), n: p.conc }));
+  if (!p.branch) { if (branches.length === 1) parts.push(t('path.inBranch', { b: t('branch.' + branches[0]) })); else if (branches.length > 1) parts.push(t('path.viaPrimitive')); }
+  else parts.push(t('path.crossBranch', { list: p.nodes.map(branchKey).filter(Boolean).filter((b, k, xs) => !k || b !== xs[k - 1]).map(b => t('branch.' + b)).join(' → '), n: p.branch }));
+  return parts.join(' · ');
+}
+// a word made neo from one of Tolkien's in another form (ᴺQ.[ᴱQ.] aico from ᴱQ. aiko): its base, unless
+// the path passes it anyway
+function baseHtml(i, p) {
+  const n = G.nodes[i];
+  if (!n.as || tolkien()) return '';
+  const [id, form] = n.as, j = indexOf.has(id) ? indexOf.get(id) : -1;
+  if (j >= 0 && p.nodes.includes(j)) return '';
+  const word = j >= 0 ? nodeButton(j)
+    : `<span class="mk" style="color:${langColor(n.al, false)}">${esc(codeMarker(n.al, false))}</span> <span class="fm">${esc(form)}</span>`;
+  return `<span class="written path-base" title="${esc(t('path.base.title'))}">${esc(t('path.base'))} ${word}</span>`;
+}
+function pathHtml(p, index) {
+  const head = p.shorter ? t('path.shorter') : index ? t('path.other', { n: index }) : '';
+  let lead = '';
+  if (pathOpt.mode === 'origin') lead = t(p.dir === 'up' ? 'path.fromB' : 'path.fromA');
+  if (pathOpt.mode === 'kin' && p.source !== undefined) lead = t('path.source') + ' ' + nodeButton(p.source) + baseHtml(p.source, p);
+  const steps = p.steps.map(s => {
+    const e = G.edges[s.k], rel = relName(e[2]), x = e[3] || {}, c = crossOf(s.k);
+    const fwd = e[0] === s.from;                 // along the link: from the source to the derivative
+    const marks = (c.conc ? ` <span class="tag cross" title="${esc(t('path.mConc.title'))}">↕ ${esc(t('path.mConc'))}</span>` : '')
+      + (c.branch ? ` <span class="tag cross" title="${esc(t('path.mBranch.title'))}">↔ ${esc(t('path.mBranch'))}</span>` : '')
+      + (x.st ? ` <span class="tag warn">${esc(t('tag.struck'))}</span>` : '');
+    const written = (x.w || []).map(([src, ch]) => `<span class="written">${esc(t('card.written', { src, chain: ch.join(' > ') }))}</span>`).join('');
+    return `<li><span class="arr">${rel === 'cognates' ? '~' : fwd ? '→' : '←'}</span> ${relTag(rel)} ${nodeButton(s.to)}${marks}${baseHtml(s.to, p)}${written}</li>`;
+  }).join('');
+  return `<div class="path-one${index ? ' alt' : ''}" data-path="${index}">
+      ${head ? `<div class="path-head">${esc(head)}</div>` : ''}
+      <div class="path-sum">${esc(pathSummary(p))} · ${esc(t('path.steps', { n: p.steps.length }))}</div>
+      ${lead ? `<div class="path-lead">${lead.startsWith('<') ? lead : lead}</div>` : ''}
+      <ul class="links path-steps"><li>${nodeButton(p.a)}${baseHtml(p.a, p)}</li>${steps}</ul>
+      ${index ? `<button class="btn" type="button" data-act="path-show" data-idx="${index}">${esc(t('path.showThis'))}</button>` : ''}
+    </div>`;
+}
+let pathFound = [];
+function runPath() {
+  if (pathA < 0 || pathB < 0) { $('path-out').innerHTML = `<p class="more">${esc(t('path.pick'))}</p>`; return; }
+  if (pathA === pathB) { $('path-out').innerHTML = `<p class="more">${esc(t('path.same'))}</p>`; return; }
+  pathFound = findPaths(pathA, pathB);
+  if (!pathFound.length) {
+    // the two ends in different conceptions cannot meet without crossing them
+    const apart = concOf(pathA) !== concOf(pathB) && ['none', 'conceptions-not'].includes(pathOpt.policy);
+    $('path-out').innerHTML = `<p class="more">${esc(apart ? t('path.none.apart', { a: CONC_NAME(concOf(pathA)), b: CONC_NAME(concOf(pathB)) })
+      : t('path.none.' + (pathOpt.policy === 'any' ? 'any' : 'policy')))}</p>`;
+    showPathOnGraph(null);
+    return;
+  }
+  $('path-out').innerHTML = pathFound.map(pathHtml).join('');
+  showPathOnGraph(pathFound[0]);
+  try { history.replaceState(null, '', `#path-${G.ids[pathA]}-${G.ids[pathB]}-${pathOpt.mode}-${pathOpt.policy}`); } catch (e) { /* the frame may refuse */ }
+}
+// the path on the graph: its nodes added (kept whatever the filters), the rest faded
+function showPathOnGraph(p) {
+  for (const [x, by] of [...owners]) {
+    if (!by.has('path')) continue;
+    by.delete('path');
+    if (!by.size && x !== focusNode) drop(x);
+  }
+  pathKeep.clear();
+  pathShown = null;
+  if (p) {
+    if (mode !== 'graph') setMode('graph');
+    // a path far from what is on screen opens on its own: the start becomes the focus
+    if (!visible.has(p.a) && !visible.has(p.b)) focus(p.a);
+    for (const v of p.nodes) { pathKeep.add(v); if (!visible.has(v)) visible.add(v); own(v, 'path'); }
+    pathShown = { nodes: new Set(p.nodes), edges: new Set(p.steps.map(s => s.k)), cross: new Set(p.steps.filter(s => { const c = crossOf(s.k); return c.conc || c.branch; }).map(s => s.k)) };
+  }
+  render(!!p);
+}
+function clearPath() {
+  pathFound = [];
+  $('path-out').innerHTML = '';
+  showPathOnGraph(null);
+}
+// the two ends: typed and picked from a list, or set from a node's card
+function pickField(side) {
+  const input = $('path-' + side), box = $('path-' + side + '-res');
+  input.addEventListener('input', () => {
+    if (side === 'a') pathA = -1; else pathB = -1;
+    const hits = findWords(input.value, 12);
+    box.innerHTML = hits.map(i => `<button type="button" data-hit="${i}">${markerHtml(i)}${G.nodes[i].k === 'root' ? '' : ' '}<span class="${G.nodes[i].k === 'root' ? 'fm root-fm' : 'fm'}">${esc(shown(i))}</span>${G.nodes[i].g ? ` <span class="gl">“${esc(G.nodes[i].g)}”</span>` : ''}</button>`).join('')
+      || (input.value.trim() ? `<div class="none">${esc(t('search.none'))}</div>` : '');
+    box.hidden = !box.innerHTML;
+  });
+  box.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-hit]');
+    if (!b) return;
+    setPathEnd(side, +b.dataset.hit);
+    box.hidden = true;
+  });
+  input.addEventListener('keydown', ev => {
+    if (ev.key === 'Enter') { const b = box.querySelector('[data-hit]'); if (b) { setPathEnd(side, +b.dataset.hit); box.hidden = true; } }
+    if (ev.key === 'Escape') box.hidden = true;
+  });
+}
+function setPathEnd(side, i) {
+  if (side === 'a') pathA = i; else pathB = i;
+  $('path-' + side).value = `${marker(i)}${G.nodes[i].k === 'root' ? '' : ' '}${shown(i)}`;
+  $('path-box').open = true;
+  if (pathA >= 0 && pathB >= 0) runPath();
+}
+pickField('a');
+pickField('b');
+for (const [id, key] of [['path-mode', 'mode'], ['path-policy', 'policy']]) {
+  $(id).value = pathOpt[key];
+  $(id).addEventListener('change', ev => { pathOpt[key] = ev.target.value; if (pathA >= 0 && pathB >= 0) runPath(); });
+}
+$('path-loose').checked = pathOpt.loose;
+$('path-loose').addEventListener('change', ev => { pathOpt.loose = ev.target.checked; if (pathA >= 0 && pathB >= 0) runPath(); });
+$('path-find').addEventListener('click', runPath);
+$('path-swap').addEventListener('click', () => {
+  const a = pathA, b = pathB;
+  pathA = -1; pathB = -1;
+  if (b >= 0) setPathEnd('a', b); else $('path-a').value = '';
+  if (a >= 0) setPathEnd('b', a); else $('path-b').value = '';
+});
+$('path-clear').addEventListener('click', () => { pathA = pathB = -1; $('path-a').value = ''; $('path-b').value = ''; clearPath(); });
+$('path-out').addEventListener('click', ev => {
+  const n = ev.target.closest('[data-node]');
+  if (n) { const i = +n.dataset.node; if (visible.has(i)) select(i); else focus(i); return; }
+  const s = ev.target.closest('[data-act="path-show"]');
+  if (s) {
+    const p = pathFound[+s.dataset.idx];
+    if (p) showPathOnGraph(p);
+    for (const el of $('path-out').querySelectorAll('.path-one')) el.classList.toggle('on', el.dataset.path === s.dataset.idx);
+  }
+});
+// an address #path-<A>-<B>[-<mode>-<policy>]
+function pathFromHash(hash) {
+  const m = /^#path-(\w+)-(\w+)(?:-(origin|kin|any))?(?:-([\w-]+))?$/.exec(hash);
+  if (!m || !indexOf.has(m[1]) || !indexOf.has(m[2])) return false;
+  if (m[3]) { pathOpt.mode = m[3]; $('path-mode').value = m[3]; }
+  if (m[4] && ['fewest', 'none', 'conceptions-not', 'branches-not', 'any'].includes(m[4])) { pathOpt.policy = m[4]; $('path-policy').value = m[4]; }
+  pathA = -1; pathB = -1;
+  setPathEnd('a', indexOf.get(m[1]));
+  setPathEnd('b', indexOf.get(m[2]));
+  return true;
+}
+
+// ---------------------------------------------------------------- export
+// The graph on screen as SVG (built from what the canvas draws, by the same rules, so the file stands
+// alone), as PNG (drawn by the canvas painter at twice the size) or as JSON; the whole origins map as
+// PNG. Files are offered through the host's downloads when the page runs as an artifact, else as a link
+const downloadsP = (() => {
+  try { return window.claude && window.claude.use ? window.claude.use('downloads').catch(() => null) : Promise.resolve(null); }
+  catch (e) { return Promise.resolve(null); }
+})();
+async function saveFile(name, data) {
+  const dl = await downloadsP;
+  if (dl) {
+    try { await dl.save({ filename: name, data }); return; }
+    catch (e) {
+      if (e && (e.code === 'declined' || e.code === 'rate_limited')) return;
+      if (!e || !['unavailable', 'not_granted', 'capability_disabled', 'capability_removed'].includes(e.code)) {
+        $('note').textContent = t('export.failed', { e: (e && (e.message || e.code)) || e });
+        return;
+      }
+    }
+  }
+  const url = URL.createObjectURL(data instanceof Blob ? data : new Blob([data]));
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+// the extent of the graph in its own units: the nodes with their labels, the links, the bands
+function graphBounds() {
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  const take = (a, b, c, d) => { if (a < x0) x0 = a; if (c > x1) x1 = c; if (b < y0) y0 = b; if (d > y1) y1 = d; };
+  for (const d of gData) take(d.x - d.w / 2 - 4, d.y - 26, d.x + d.w / 2 + 4, d.y + 16);
+  for (const l of gLinks) { const g = edgeGeom(l); if (g) take(g.x0 - 8, g.y0 - 8, g.x1 + 8, g.y1 + 8); }
+  if (gBands.length && gData.length) {
+    const [bx0, bx1] = bandSpan();
+    for (const b of gBands) take(bx0, b.y0 - 22, bx1, b.y1);
+  }
+  return { x0, y0, x1, y1 };
+}
+function graphSvg() {
+  const pad = 24, bb = graphBounds();
+  const w = Math.ceil(bb.x1 - bb.x0 + 2 * pad), h = Math.ceil(bb.y1 - bb.y0 + 2 * pad);
+  const f = v => +v.toFixed(2);
+  const out = [`<?xml version="1.0" encoding="UTF-8"?>`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`,
+    `<rect width="${w}" height="${h}" fill="${css('--bg')}"/>`,
+    `<g transform="translate(${f(pad - bb.x0)},${f(pad - bb.y0)})">`];
+  if (gBands.length && gData.length) {
+    const [x0, x1] = bandSpan();
+    for (const b of gBands) {
+      out.push(`<rect x="${f(x0)}" y="${f(b.y0)}" width="${f(x1 - x0)}" height="${f(b.y1 - b.y0)}" rx="8" fill="${css('--line')}" fill-opacity="0.22"/>`);
+      out.push(`<text x="${f(x0 + 4)}" y="${f(b.y0 - 8)}" fill="${css('--muted')}" font-family="${esc(css('--f-ui'))}" font-size="11" font-weight="600" letter-spacing="0.66">${esc(t('band.' + b.b).toLocaleUpperCase(uiLang))}</text>`);
+    }
+  }
+  for (const d of gLinks) {
+    const g = edgeGeom(d);
+    if (!g) continue;
+    const L = edgeLook(d);
+    out.push(`<g opacity="${L.op}"><path d="${d._p}" fill="none" stroke="${L.color}" stroke-width="${L.width}"${L.dash ? ` stroke-dasharray="${L.dash}"` : ''}/>`
+      + (L.arrow ? `<path d="M${arrowPoints(g).map(([x, y]) => f(x) + ',' + f(y)).join('L')}Z" fill="${L.color}"/>` : '') + '</g>');
+  }
+  for (const d of gData) {
+    const L = nodeLook(d);
+    let g = `<g transform="translate(${f(d.x)},${f(d.y)})"${L.op < 1 ? ` opacity="${L.op}"` : ''}>`;
+    if (L.ring) g += `<circle r="${f(RING_R)}" fill="none" stroke="${L.ring}" stroke-width="2.2"/>`;
+    g += `<path d="${shapePath(d.i)}" fill="${L.fill}" stroke="${L.stroke}" stroke-width="${L.width}"${L.dash ? ` stroke-dasharray="${L.dash}"` : ''}/>`;
+    g += `<text x="${f(-d.lw / 2)}" y="${LABEL_Y}" xml:space="preserve" stroke="${css('--bg')}" stroke-width="3" stroke-linejoin="round" paint-order="stroke">`
+      + d.runs.map(r => `<tspan x="${f(-d.lw / 2 + r.dx)}" font-family="${esc(r.family)}" font-size="${r.size}"${r.style !== 'normal' ? ` font-style="${r.style}"` : ''} font-weight="${r.weight}" fill="${r.color}">${esc(r.t)}</tspan>`).join('')
+      + '</text></g>';
+    out.push(g);
+  }
+  out.push('</g>', '</svg>');
+  return { text: out.join('\n'), w, h, bb, pad };
+}
+function fileStem() {
+  const i = focusNode >= 0 ? focusNode : selected;
+  const f = i >= 0 ? String(shown(i)).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\p{L}\p{N}-]+/gu, '_') : 'graph';
+  return 'neo-roots-' + (f || 'graph');
+}
+async function exportAs(kind) {
+  if (kind === 'svg') {
+    await saveFile(fileStem() + '.svg', new Blob([graphSvg().text], { type: 'image/svg+xml' }));
+  } else if (kind === 'png') {
+    const pad = 24, bb = graphBounds();
+    const w = bb.x1 - bb.x0 + 2 * pad, h = bb.y1 - bb.y0 + 2 * pad;
+    const scale = Math.min(2, 16000 / Math.max(w, h));
+    const c = document.createElement('canvas');
+    c.width = Math.round(w * scale); c.height = Math.round(h * scale);
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = css('--bg'); ctx.fillRect(0, 0, c.width, c.height);
+    paintGraph(ctx, { k: 1, x: pad - bb.x0, y: pad - bb.y0 }, scale);
+    await saveFile(fileStem() + '.png', await new Promise(r => c.toBlob(r, 'image/png')));
+  } else if (kind === 'json') {
+    const shownNow = [...shownNodes];
+    const out = {
+      source: { eldamo_version: G.version, site: 'https://eldamo.org' },
+      focus: focusNode >= 0 ? G.ids[focusNode] : null,
+      nodes: shownNow.map(i => {
+        const n = G.nodes[i], id = G.ids[i];
+        return Object.assign({ id, form: n.f, lang: n.l, kind: n.k }, n.g ? { gloss: n.g } : {},
+          /^\d+$/.test(id) ? { url: SITE + id + '.html' } : {});
+      }),
+      edges: currentLinks.map(l => Object.assign({ from: G.ids[l.a], to: G.ids[l.b], rel: l.rel },
+        l.via ? { through_hidden: true } : {}, l.x && l.x.nm ? { not_matched: true } : {},
+        l.x && l.x.sc ? { shortcut: true } : {},
+        l.x && l.x.st ? { struck: true } : {},
+        l.x && l.x.w ? { written: l.x.w.map(([src, chain]) => ({ source: src, chain })) } : {})),
+    };
+    await saveFile(fileStem() + '.json', JSON.stringify(out, null, 1));
+  } else if (kind === 'map') {
+    const size = 4000, c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = css('--bg'); ctx.fillRect(0, 0, size, size);
+    const k = 0.96 * size / 1000;
+    ovPaint(ctx, size, size, 1, d3.zoomIdentity.translate((size - 1000 * k) / 2, (size - 1000 * k) / 2).scale(k));
+    await saveFile('neo-roots-origins-map.png', await new Promise(r => c.toBlob(r, 'image/png')));
+  }
+}
+$('export').addEventListener('click', ev => {
+  ev.stopPropagation();
+  const menu = $('export-menu');
+  menu.hidden = !menu.hidden;
+  $('export').setAttribute('aria-expanded', String(!menu.hidden));
+  for (const b of menu.querySelectorAll('button')) b.hidden = b.dataset.mode !== mode;
+});
+$('export-menu').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-exp]');
+  if (!b) return;
+  $('export-menu').hidden = true;
+  $('export').setAttribute('aria-expanded', 'false');
+  exportAs(b.dataset.exp).catch(e => { $('note').textContent = t('export.failed', { e: e.message || e }); });
+});
+document.addEventListener('click', ev => {
+  if (!ev.target.closest('.export')) { $('export-menu').hidden = true; $('export').setAttribute('aria-expanded', 'false'); }
+});
+
+// ---------------------------------------------------------------- legend
+function legend() {
+  const nodeItems = [
+    [t('legend.n.nq'), d3.symbol(d3.symbolCircle, 120)(), css('--n-nq'), css('--n-nq'), null],
+    [t('legend.n.ns'), d3.symbol(d3.symbolCircle, 120)(), css('--n-ns'), css('--n-ns'), null],
+    [t('legend.n.np'), d3.symbol(d3.symbolCircle, 120)(), css('--n-np'), css('--n-np'), null],
+    [t('legend.n.proto'), d3.symbol(d3.symbolCircle, 120)(), css('--bg'), css('--n-np'), null],
+    [t('legend.n.form'), d3.symbol(d3.symbolCircle, 70)(), css('--n-form'), css('--n-form'), null],
+    [t('legend.n.root'), d3.symbol(d3.symbolDiamond, 150)(), css('--n-root'), css('--n-root'), null],
+    [t('legend.n.rootWarn'), d3.symbol(d3.symbolDiamond, 150)(), css('--bg'), css('--n-root'), '2 2'],
+    [t('legend.n.merged'), d3.symbol(d3.symbolCircle, 120)(), css('--bg'), css('--n-nq'), null],
+    [t('legend.n.dep'), d3.symbol(d3.symbolCircle, 120)(), css('--n-nq'), css('--n-nq'), null, 0.45],
+    [t('legend.n.other'), d3.symbol(d3.symbolCircle, 120)(), css('--n-form'), css('--n-form'), '2 2', 0.55],
+    [t('legend.n.name'), d3.symbol(d3.symbolCircle, 120)(), css('--n-nq'), css('--n-nq'), '4 2', 0.7],
+  ];
+  $('legend-nodes').innerHTML = nodeItems.map(([label, d, fill, stroke, dash, op]) =>
+    `<label><svg width="16" height="16" viewBox="-8 -8 16 16" aria-hidden="true"><path d="${d}" fill="${fill}" stroke="${stroke}" stroke-width="1.6"${dash ? ` stroke-dasharray="${dash}"` : ''}${op ? ` opacity="${op}"` : ''}/></svg>${esc(label)}</label>`).join('');
+  $('legend-edges').innerHTML = G.rels.map(r =>
+    `<label title="${esc(REL[r][1])}"><input type="checkbox" id="rel-${r}" data-rel="${r}"${relOn[r] ? ' checked' : ''}>`
+    + `<svg width="26" height="10" viewBox="0 0 26 10" aria-hidden="true"><line x1="1" y1="5" x2="25" y2="5" stroke="${css('--e-' + r)}" stroke-width="${r === 'element' ? 2 : 1.6}"${DASH[r] ? ` stroke-dasharray="${DASH[r]}"` : ''}/></svg>${esc(REL[r][0])}</label>`).join('');
+}
+// languages present on the graph, by branch, from neo to early; the marker in its colour
+const LANG_COUNT = new Map();
+for (const n of G.nodes) LANG_COUNT.set(n.l, (LANG_COUNT.get(n.l) || 0) + 1);
+const BRANCH_ORDER = ['quenya', 'sindarin', 'primitive', 'elvish', 'other'];
+function legendLangs() {
+  const groups = new Map(BRANCH_ORDER.map(b => [b, []]));
+  for (const code of LANG_COUNT.keys()) groups.get(branchOf(code)).push(code);
+  $('legend-langs').innerHTML = BRANCH_ORDER.filter(b => groups.get(b).length).map(b => {
+    const codes = groups.get(b).sort((x, y) => eraOf(y) - eraOf(x) || x.localeCompare(y));
+    const all = codes.every(c => langOn[c] !== false);
+    return `<div class="lang-group"><label><input type="checkbox" data-branch="${b}"${all ? ' checked' : ''}> ${esc(t('branch.' + b))}</label>`
+      + `<div class="lang-items">${codes.map(c => `<label title="${esc(langName(c))}"><input type="checkbox" data-lang="${c}"${langOn[c] !== false ? ' checked' : ''}>`
+      + `<span class="mk" style="color:${langColor(c, false)}">${esc(codeMarker(c, false))}</span>`
+      + `<span>${esc(langName(c))}</span> <span class="cnt">${num(LANG_COUNT.get(c))}</span></label>`).join('')}</div></div>`;
+  }).join('');
+}
+function refilter() {
+  render(false);
+  if (selected >= 0) select(selected);
+  if (ovBuilt) buildOverview();
+  if (!$('results').hidden) search();
+}
+$('legend-langs').addEventListener('change', ev => {
+  const c = ev.target;
+  if (c.dataset.lang) langOn[c.dataset.lang] = c.checked;
+  if (c.dataset.branch) for (const code of LANG_COUNT.keys()) if (branchOf(code) === c.dataset.branch) langOn[code] = c.checked;
+  legendLangs();
+  refilter();
+});
+// a kind of words switched on also joins the focus's own neighbourhood (its tree and derivatives), as if
+// it had been on when the node was opened; switched off, it just goes
+function switchKind(on) {
+  if (on && focusNode >= 0 && mode === 'graph') {
+    const sel = selected;
+    focus(focusNode, true);
+    if (sel >= 0 && visible.has(sel)) select(sel);
+    if (ovBuilt) buildOverview();
+    if (!$('results').hidden) search();
+  } else refilter();
+}
+$('show-dep').addEventListener('change', ev => { showDeprecated = ev.target.checked; switchKind(showDeprecated); });
+function applyVocab() {
+  $('vocab').value = vocab;
+  // in Tolkien's vocabulary deprecated and other ⚠ words are ordinary words: their switches do not apply
+  for (const id of ['show-dep', 'show-oth']) $(id).disabled = tolkien();
+}
+$('vocab').addEventListener('change', ev => {
+  vocab = ev.target.value === 'tolkien' ? 'tolkien' : 'neo';
+  try { localStorage.setItem('neo-roots-vocab', vocab); } catch (e) { /* storage unavailable */ }
+  applyVocab();
+  switchKind(true);          // either way some words appear: neologisms, or the deprecated as ordinary words
+});
+applyVocab();
+$('show-oth').addEventListener('change', ev => { showOther = ev.target.checked; switchKind(showOther); });
+$('show-nam').addEventListener('change', ev => { showNames = ev.target.checked; switchKind(showNames); });
+$('col-order').value = colOrder;
+$('col-order').addEventListener('change', ev => {
+  colOrder = ev.target.value;
+  try { localStorage.setItem('neo-roots-order', colOrder); } catch (e) { /* storage unavailable */ }
+  for (const i of visible) pos.delete(i);
+  render(true);
+  if (selected >= 0) select(selected);
+});
+$('par-mode').addEventListener('change', ev => {
+  parMode = ev.target.value;
+  for (const i of visible) pos.delete(i);          // a new arrangement, laid out afresh
+  render(true);
+  if (selected >= 0) select(selected);
+});
+
+$('legend-edges').addEventListener('change', ev => {
+  const c = ev.target.closest('[data-rel]');
+  if (!c) return;
+  relOn[c.dataset.rel] = c.checked;
+  render(false);
+  if (selected >= 0) select(selected);
+});
+
+$('shortcuts').addEventListener('change', ev => {
+  showShortcuts = ev.target.checked;
+  if (showShortcuts && focusNode >= 0) for (const x of upstream(focusNode, 300)) { visible.add(x); own(x, 'core'); }
+  render(false);
+  if (selected >= 0) select(selected);
+});
+
+// theme changes recolor the drawing
+function recolor() {
+  cssCache.clear();
+  colorCache.clear();
+  legend(); legendLangs();
+  grRequestDraw();
+  if (visible.size) render(false); if (selected >= 0) select(selected); if (ovBuilt) buildOverview();
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', recolor);
+new MutationObserver(recolor).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+// ---------------------------------------------------------------- start
+const words = G.nodes.filter(isListed).length;
+const depWords = G.nodes.filter(n => n.x === 'd').length;
+const otherWords = G.nodes.filter(n => n.x === 'o').length;
+const nameWords = G.nodes.filter(n => n.x === 'n').length;
+const rootsCount = G.nodes.filter(n => n.k === 'root').length;
+function showStat() {
+  $('stat').textContent = t('page.stat', { v: G.version, words: num(words), dep: num(depWords), oth: num(otherWords), nam: num(nameWords), roots: num(rootsCount), edges: num(G.edges.length) });
+}
+function applyLanguage() {
+  translateStatic();
+  applyTheme();
+  showStat();
+  showNote();
+  legend();
+  legendLangs();
+  if (selected >= 0) select(selected);
+  if (!$('results').hidden) search();
+  if (visible.size) render(false);
+  if (ovBuilt) buildOverview();
+}
+// the theme: the system's (or the host's) by default, or chosen here: auto -> light -> dark;
+// the choice is kept in this browser and set as data-theme, which the colour tokens follow
+const THEME_KEY = 'neo-roots-theme';
+let themeChoice = (() => { try { const v = localStorage.getItem(THEME_KEY); return v === 'light' || v === 'dark' ? v : 'auto'; } catch (e) { return 'auto'; } })();
+const hostTheme = document.documentElement.getAttribute('data-theme');
+function applyTheme() {
+  if (themeChoice === 'auto') {
+    if (hostTheme) document.documentElement.setAttribute('data-theme', hostTheme);
+    else document.documentElement.removeAttribute('data-theme');
+  } else document.documentElement.setAttribute('data-theme', themeChoice);
+  $('theme-toggle').textContent = { auto: '◐', light: '☀', dark: '☾' }[themeChoice];
+  $('theme-toggle').title = t('theme.' + themeChoice) + ' — ' + t('theme.title');
+  $('theme-toggle').setAttribute('aria-label', $('theme-toggle').title);
+}
+$('theme-toggle').addEventListener('click', () => {
+  themeChoice = { auto: 'light', light: 'dark', dark: 'auto' }[themeChoice];
+  try { localStorage.setItem(THEME_KEY, themeChoice); } catch (e) { /* storage unavailable */ }
+  applyTheme();
+});
+$('lang-toggle').addEventListener('click', () => {
+  uiLang = uiLang === 'ru' ? 'en' : 'ru';
+  try { localStorage.setItem(LANG_KEY, uiLang); } catch (e) { /* storage unavailable */ }
+  applyLanguage();
+});
+translateStatic();
+applyTheme();
+showStat();
+legend();
+legendLangs();
+function fromHash() {
+  const m = /^#n-(\w+)$/.exec(location.hash);
+  return m && indexOf.has(m[1]) ? indexOf.get(m[1]) : -1;
+}
+window.addEventListener('hashchange', () => {
+  if (location.hash === '#all-roots') { setMode('roots'); return; }
+  if (location.hash.startsWith('#path-')) { pathFromHash(location.hash); return; }
+  const i = fromHash(); if (i >= 0 && i !== focusNode) focus(i);
+  else if (i < 0) {
+    const h = location.hash;
+    try { history.replaceState(null, '', '#n-' + G.ids[focusNode]); } catch (e) { /* the frame may refuse */ }
+    unknownNode(h);
+  }
+});
+// an address with a page that is not on the graph (a name, a phrase...): said so, not passed over
+function unknownNode(hash = location.hash) {
+  const m = /^#n-(\w+)$/.exec(hash);
+  if (m && !indexOf.has(m[1])) { unknownMsg = t('note.unknown', { id: m[1] }); showNote(); }
+}
+const wantRoots = location.hash === '#all-roots';
+const startHash = location.hash;          // focus() rewrites the address
+const start = fromHash();
+const startPath = startHash.startsWith('#path-');
+const pathStart = startPath ? /^#path-(\w+)-/.exec(startHash) : null;
+focus(start >= 0 ? start : pathStart && indexOf.has(pathStart[1]) ? indexOf.get(pathStart[1])
+  : indexOf.get('3583944535'));     // Q. Elda
+if (wantRoots) setMode('roots');
+if (startPath) pathFromHash(startHash);
+else if (start < 0) unknownNode(startHash);
+})();
+</script>
